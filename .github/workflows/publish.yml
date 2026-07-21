@@ -1,0 +1,21 @@
+name: publish 
+on:
+  push:
+    branches: 
+      - main
+  workflow_dispatch:      
+permissions:
+  contents: write
+jobs:
+  deploy:
+    name: Publish Tool
+    if: github.event.repository.fork == false    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo content
+        uses: actions/checkout@v4
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./src

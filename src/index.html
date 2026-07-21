@@ -1,0 +1,2041 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Image Transparency Tool</title>
+  <meta name="description" content="A browser-based tool for adding a visible AI disclosure badge and transparency metadata to PNG, JPEG and WebP images." />
+  <meta name="author" content="STÜBER SYSTEMS GmbH" />
+  <meta name="application-name" content="AI Image Transparency Tool" />
+  <link rel="canonical" href="https://openpotato.github.io/ai-image-transparency-tool/" />
+  <link rel="license" href="https://github.com/openpotato/ai-image-transparency-tool/blob/main/LICENSE" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="OpenPotato" />
+  <meta property="og:title" content="AI Image Transparency Tool" />
+  <meta property="og:description" content="Add a visible AI disclosure badge and transparency metadata directly in your browser." />
+  <meta property="og:url" content="https://openpotato.github.io/ai-image-transparency-tool/" />
+  <meta property="og:locale" content="en_US" />
+
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f3f5f7;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #667085;
+      --border: #d0d5dd;
+      --accent: #2563eb;
+      --danger: #b42318;
+      --shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101318;
+        --panel: #181d24;
+        --text: #f5f7fa;
+        --muted: #a7b0be;
+        --border: #394150;
+        --accent: #7aa2ff;
+        --danger: #ff8a80;
+        --shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      width: min(1280px, calc(100% - 32px));
+      margin: 24px auto;
+      display: grid;
+      grid-template-columns: minmax(320px, 410px) minmax(0, 1fr);
+      align-items: start;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      padding: 22px;
+      align-self: start;
+    }
+
+    .preview-panel {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      padding: 18px;
+      min-height: 0;
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.45rem;
+    }
+
+    h2 {
+      margin: 22px 0 12px;
+      font-size: 1rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .field {
+      margin-top: 14px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.86rem;
+      font-weight: 650;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      width: 100%;
+      font: inherit;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 11px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 86px;
+      resize: vertical;
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+    }
+
+    .range-line {
+      display: grid;
+      grid-template-columns: 1fr 58px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quality-field .range-line {
+      min-height: 42px;
+    }
+
+    output {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+    }
+
+    .checkbox-line {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 13px;
+    }
+
+    .checkbox-line input {
+      width: auto;
+    }
+
+    .checkbox-line label {
+      margin: 0;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 11px;
+      padding: 11px 14px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .canvas-wrap {
+      flex: 0 1 auto;
+      min-height: min(420px, calc(100vh - 130px));
+      max-height: calc(100vh - 130px);
+      display: grid;
+      place-items: start center;
+      overflow: auto;
+      border-radius: 13px;
+      border: 1px dashed var(--border);
+      background:
+        linear-gradient(45deg, rgba(127, 127, 127, 0.10) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(127, 127, 127, 0.10) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(127, 127, 127, 0.10) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(127, 127, 127, 0.10) 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 76vh;
+      object-fit: contain;
+    }
+
+    .status {
+      min-height: 1.25em;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .metadata-preview {
+      margin-top: 10px;
+      padding: 10px;
+      max-height: 160px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font: 0.78rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: var(--muted);
+    }
+
+    .note {
+      margin-top: 14px;
+      font-size: 0.78rem;
+    }
+
+    .page-footer {
+      width: min(1280px, calc(100% - 32px));
+      margin: -4px auto 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .page-footer a {
+      color: var(--accent);
+    }
+    
+    @media (max-width: 850px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-panel {
+        position: static;
+        max-height: none;
+        min-height: 430px;
+      }
+
+      .canvas-wrap {
+        min-height: 330px;
+        max-height: none;
+      }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI Image Transparency Tool",
+    "description": "A browser-based tool for adding a visible AI disclosure badge and transparency metadata to PNG, JPEG and WebP images.",
+    "url": "https://openpotato.github.io/ai-image-transparency-tool/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires a modern browser with JavaScript and HTML Canvas support.",
+    "isAccessibleForFree": true,
+    "author": {
+      "@type": "Organization",
+      "name": "STÜBER SYSTEMS GmbH",
+      "url": "https://github.com/stuebersystems"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "OpenPotato",
+      "url": "https://github.com/openpotato"
+    },
+    "copyrightHolder": {
+      "@type": "Organization",
+      "name": "STÜBER SYSTEMS GmbH"
+    },
+    "copyrightYear": 2026,
+    "license": "https://github.com/openpotato/ai-image-transparency-tool/blob/main/LICENSE"
+  }
+  </script>
+</head>
+
+<body>
+  <main class="app">
+    <section class="panel controls">
+      <h1>AI Image Transparency Tool</h1>
+      <p>Everything runs locally in your browser. Images are never uploaded.</p>
+
+      <h2>1. Images</h2>
+      <div class="field">
+        <label for="sourceFile">Source image (PNG, JPEG or WebP)</label>
+        <input id="sourceFile" type="file" accept="image/png,image/jpeg,image/webp" />
+      </div>
+
+      <div class="field">
+        <label for="defaultBadge">Badge</label>
+        <select id="defaultBadge">
+          <option value="ai-generated-black-transparent" selected>AI Generated Black Transparent</option>
+          <option value="ai-generated-black">AI Generated Black</option>
+        </select>
+      </div>
+      <p class="note">Select one of the built-in AI disclosure badges.</p>
+
+      <h2>2. Badge</h2>
+      <div class="field-row">
+        <div class="field">
+          <label for="position">Position</label>
+          <select id="position">
+            <option value="top-left">Top / left</option>
+            <option value="top-right">Top / right</option>
+            <option value="bottom-left">Bottom / left</option>
+            <option value="bottom-right" selected>Bottom / right</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="margin">Margin (px)</label>
+          <input id="margin" type="number" min="0" max="500" value="24" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="badgeSize">Badge width</label>
+        <div class="range-line">
+          <input id="badgeSize" type="range" min="5" max="60" value="20" />
+          <output id="badgeSizeValue">20%</output>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="opacity">Opacity</label>
+        <div class="range-line">
+          <input id="opacity" type="range" min="10" max="100" value="100" />
+          <output id="opacityValue">100%</output>
+        </div>
+      </div>
+
+      <h2>3. Metadata</h2>
+      <div class="field">
+        <label for="metadataMode">Metadata handling</label>
+        <select id="metadataMode">
+          <option value="update" selected>Update existing metadata</option>
+          <option value="replace">Replace metadata completely</option>
+        </select>
+      </div>
+      <p class="note"><strong>Update</strong> keeps supported unrelated source metadata and fills empty fields from
+        existing XMP. <strong>Replace</strong> discards source metadata and writes only the metadata generated by this
+        tool.</p>
+
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" maxlength="250" placeholder="e.g. Person standing in front of a car" />
+      </div>
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea id="description" maxlength="4000"
+          placeholder="AI-generated illustration of a person standing in front of a car."></textarea>
+      </div>
+      <div class="field">
+        <label for="digitalSourceType">Digital source type</label>
+        <input id="digitalSourceType" type="text" maxlength="500"
+          value="http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="aiSystemUsed">AI system used</label>
+          <input id="aiSystemUsed" type="text" maxlength="250" placeholder="e.g. ChatGPT" />
+        </div>
+        <div class="field">
+          <label for="aiSystemVersionUsed">AI system version</label>
+          <input id="aiSystemVersionUsed" type="text" maxlength="100" placeholder="Optional" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="aiPromptInformation">AI prompt information</label>
+        <textarea id="aiPromptInformation" maxlength="8000"
+          placeholder="Describe the prompt or instructions used to generate the image."></textarea>
+      </div>
+      <div class="field">
+        <label for="aiPromptWriterName">AI prompt writer name</label>
+        <input id="aiPromptWriterName" type="text" maxlength="250" placeholder="Name of the human prompt author" />
+      </div>
+      <div class="field">
+        <label for="aiPromptWriterOrganisation">AI prompt writer organisation</label>
+        <input id="aiPromptWriterOrganisation" type="text" maxlength="500" placeholder="e.g. Company XY" />
+      </div>
+      <div class="field">
+        <label for="creditLine">Credit line</label>
+        <input id="creditLine" type="text" maxlength="500"
+          placeholder="e.g. AI-generated image produced by Company XY using ChatGPT" />
+      </div>
+      <div class="field">
+        <label for="disclosure">Disclosure</label>
+        <input id="disclosure" type="text" maxlength="250" value="AI-generated" />
+      </div>
+      <div class="field">
+        <label for="processingOperations">Processing operations (JSON array)</label>
+        <textarea id="processingOperations" spellcheck="false">[
+  {
+    "type": "humanNonGenerativeEdit",
+    "description": "Added a visible AI disclosure badge."
+  }
+]</textarea>
+      </div>
+      <p class="note">Add earlier processing steps here, for example <code>humanComposite</code> when a screenshot,
+        photo, logo or other non-AI element was inserted into an AI-generated base image. Each item requires a non-empty
+        <code>type</code> and <code>description</code>.</p>
+      <div class="field">
+        <label for="customMetadata">Custom metadata (JSON object)</label>
+        <textarea id="customMetadata" spellcheck="false"
+          placeholder='{"projectId":"example","reviewed":true}'></textarea>
+      </div>
+      <p class="note">The preview includes the logical metadata object, the exact XMP field mapping and a security note.
+        IPTC/DC/Photoshop fields are embedded as XMP; processing, disclosure and custom values remain in the tool's XMP
+        namespace.</p>
+      <div id="metadataPreview" class="metadata-preview">{}</div>
+
+      <h2>4. Export</h2>
+      <div class="field-row">
+        <div class="field">
+          <label for="format">Format</label>
+          <select id="format">
+            <option value="image/png">PNG</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+        </div>
+        <div class="field quality-field">
+          <label for="quality">JPEG/WebP quality</label>
+          <div class="range-line">
+            <input id="quality" type="range" min="40" max="100" value="92" />
+            <output id="qualityValue">92%</output>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-row" style="grid-template-columns: 1fr;">
+        <button id="downloadButton" class="primary" type="button" disabled>Download image</button>
+      </div>
+      <p class="note">The image pixels are re-encoded. In update mode, supported PNG text/EXIF metadata, JPEG
+        EXIF/comments, or WebP EXIF metadata are copied and existing XMP is merged. EXIF orientation is normalized and
+        stale embedded EXIF thumbnails are removed. Color profiles and some format-specific metadata cannot always be
+        carried across format conversion.</p>
+    </section>
+
+    <section class="panel preview-panel">
+      <div>
+        <strong>Preview</strong>
+        <div id="status" class="status">Choose a source image.</div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="canvas" aria-label="Image preview"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <small>Made with ❤️ in Berlin. Source code on <a
+        href="https://github.com/openpotato/ai-image-transparency-tool">GitHub</a>.</small>
+  </footer>
+
+  <script>
+    "use strict";
+
+    const els = {
+      sourceFile: document.querySelector("#sourceFile"),
+      defaultBadge: document.querySelector("#defaultBadge"),
+      position: document.querySelector("#position"),
+      margin: document.querySelector("#margin"),
+      badgeSize: document.querySelector("#badgeSize"),
+      badgeSizeValue: document.querySelector("#badgeSizeValue"),
+      opacity: document.querySelector("#opacity"),
+      opacityValue: document.querySelector("#opacityValue"),
+      digitalSourceType: document.querySelector("#digitalSourceType"),
+      aiSystemUsed: document.querySelector("#aiSystemUsed"),
+      aiSystemVersionUsed: document.querySelector("#aiSystemVersionUsed"),
+      aiPromptInformation: document.querySelector("#aiPromptInformation"),
+      aiPromptWriterName: document.querySelector("#aiPromptWriterName"),
+      aiPromptWriterOrganisation: document.querySelector("#aiPromptWriterOrganisation"),
+      title: document.querySelector("#title"),
+      description: document.querySelector("#description"),
+      creditLine: document.querySelector("#creditLine"),
+      disclosure: document.querySelector("#disclosure"),
+      processingOperations: document.querySelector("#processingOperations"),
+      customMetadata: document.querySelector("#customMetadata"),
+      metadataMode: document.querySelector("#metadataMode"),
+      metadataPreview: document.querySelector("#metadataPreview"),
+      format: document.querySelector("#format"),
+      quality: document.querySelector("#quality"),
+      qualityValue: document.querySelector("#qualityValue"),
+      downloadButton: document.querySelector("#downloadButton"),
+      status: document.querySelector("#status"),
+      canvas: document.querySelector("#canvas")
+    };
+
+    const ctx = els.canvas.getContext("2d", { alpha: true });
+    const utf8 = new TextEncoder();
+    const utf8Decoder = new TextDecoder("utf-8");
+    const latin1Decoder = new TextDecoder("latin1");
+
+    let sourceImage = null;
+    let badgeImage = null;
+    let sourceBaseName = "image";
+    let sourceBytes = null;
+    let sourceMimeType = null;
+    let sourceMetadata = emptySourceMetadata();
+    let renderQueued = false;
+    let lastExportReport = null;
+
+    const SECURITY_NOTE = "The metadata written by this tool is unsigned XMP metadata and does not provide tamper detection. No C2PA manifest, digital signature, or trusted timestamp was added by this tool.";
+
+    const defaultBadgeSvgs = {
+      "ai-generated-black-transparent": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1789.84 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill-rule: evenodd;
+                opacity: .5;
+              }
+
+              .cls-2 {
+                fill: #fff;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M352.84,410.77h1093.16c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H352.84c-85.55,0-145.54,59.94-145.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-2" d="M326.09,341c-.98,0-1.87-.4-2.66-1.19-.8-.79-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.79-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38-.92-.92-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.74-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM369.27,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-2" d="M469.58,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+          <g>
+            <path class="cls-2" d="M639.25,325.87c-8.43,0-15.63-1.41-21.59-4.24-5.97-2.83-10.58-6.95-13.86-12.38-3.27-5.42-5.04-11.99-5.31-19.71-.09-3.86-.13-7.98-.13-12.38s.04-8.56.13-12.51c.27-7.53,2.04-13.94,5.31-19.24,3.27-5.29,7.94-9.35,13.99-12.17,6.05-2.83,13.2-4.24,21.46-4.24,6.64,0,12.46.85,17.49,2.56,5.02,1.7,9.24,3.92,12.65,6.66,3.41,2.74,6.01,5.72,7.8,8.95,1.79,3.23,2.74,6.32,2.83,9.28,0,.81-.27,1.5-.81,2.08-.54.58-1.26.87-2.15.87h-16.68c-.9,0-1.59-.18-2.08-.54-.49-.36-.92-.9-1.28-1.61-.63-1.61-1.64-3.25-3.03-4.91-1.39-1.66-3.25-3.07-5.58-4.24-2.33-1.16-5.38-1.75-9.15-1.75-5.65,0-10.11,1.48-13.39,4.44-3.27,2.96-5.04,7.8-5.31,14.53-.27,7.71-.27,15.56,0,23.54.27,7,2.08,12.02,5.45,15.07,3.36,3.05,7.87,4.57,13.52,4.57,3.68,0,6.97-.65,9.89-1.95,2.91-1.3,5.22-3.34,6.93-6.12,1.7-2.78,2.56-6.32,2.56-10.63v-3.36h-14.66c-.9,0-1.66-.34-2.29-1.01-.63-.67-.94-1.46-.94-2.35v-8.61c0-.99.31-1.79.94-2.42.63-.63,1.39-.94,2.29-.94h32.96c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v14.66c0,7.71-1.68,14.31-5.04,19.78-3.36,5.47-8.16,9.66-14.39,12.58-6.23,2.92-13.52,4.37-21.86,4.37Z"/>
+            <path class="cls-2" d="M710.73,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M805.88,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h12.24c1.34,0,2.33.32,2.96.94.63.63,1.03,1.12,1.21,1.48l35.92,56.1v-55.15c0-.99.31-1.79.94-2.42s1.39-.94,2.29-.94h13.72c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v87.44c0,.9-.32,1.68-.94,2.35-.63.67-1.44,1.01-2.42,1.01h-12.38c-1.35,0-2.31-.34-2.89-1.01-.58-.67-1.01-1.14-1.28-1.41l-35.78-54.35v53.41c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-13.59Z"/>
+            <path class="cls-2" d="M912.19,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M1007.35,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h35.65c11.21,0,20.04,2.58,26.5,7.74,6.46,5.16,9.69,12.58,9.69,22.26,0,6.55-1.57,12.02-4.71,16.41-3.14,4.4-7.35,7.67-12.65,9.82l18.97,33.63c.27.54.4,1.03.4,1.48,0,.72-.27,1.37-.81,1.95-.54.58-1.21.88-2.02.88h-14.93c-1.61,0-2.82-.42-3.63-1.28-.81-.85-1.39-1.63-1.75-2.35l-16.41-30.8h-16.28v31.07c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-14.66ZM1025.38,273h17.22c4.93,0,8.59-1.12,10.96-3.36,2.38-2.24,3.56-5.38,3.56-9.42s-1.17-7.22-3.5-9.55c-2.33-2.33-6.01-3.5-11.03-3.5h-17.22v25.83Z"/>
+            <path class="cls-2" d="M1100.62,324.52c-.81,0-1.48-.29-2.02-.88-.54-.58-.81-1.23-.81-1.95,0-.45.04-.85.13-1.21l32.02-86.5c.27-.99.81-1.84,1.61-2.56.81-.72,1.93-1.08,3.36-1.08h17.22c1.43,0,2.56.36,3.36,1.08.81.72,1.35,1.57,1.61,2.56l32.02,86.5c.09.36.13.76.13,1.21,0,.72-.27,1.37-.81,1.95-.54.58-1.21.88-2.02.88h-13.99c-1.35,0-2.33-.31-2.96-.94-.63-.63-1.03-1.21-1.21-1.75l-5.78-15.07h-37.94l-5.78,15.07c-.18.54-.58,1.12-1.21,1.75-.63.63-1.61.94-2.96.94h-13.99ZM1129.54,289.41h27.85l-13.86-38.74-13.99,38.74Z"/>
+            <path class="cls-2" d="M1225.64,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-72.1h-24.48c-.9,0-1.66-.31-2.29-.94-.63-.63-.94-1.39-.94-2.29v-12.11c0-.99.31-1.79.94-2.42s1.39-.94,2.29-.94h70.49c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v12.11c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-24.35v72.1c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-14.93Z"/>
+            <path class="cls-2" d="M1298.32,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M1393.48,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h33.77c8.97,0,16.46,1.41,22.46,4.24,6.01,2.83,10.6,6.95,13.79,12.38,3.18,5.43,4.86,12.13,5.04,20.11.09,3.95.13,7.4.13,10.36s-.05,6.37-.13,10.22c-.27,8.34-1.93,15.25-4.98,20.72-3.05,5.47-7.53,9.53-13.45,12.17-5.92,2.65-13.32,3.97-22.2,3.97h-34.44ZM1411.51,307.17h15.74c4.48,0,8.16-.67,11.03-2.02,2.87-1.35,5-3.47,6.39-6.39,1.39-2.91,2.13-6.7,2.22-11.37.09-2.6.16-4.93.2-7,.04-2.06.04-4.12,0-6.19-.05-2.06-.11-4.35-.2-6.86-.18-6.73-1.91-11.68-5.18-14.87-3.27-3.18-8.32-4.78-15.13-4.78h-15.07v59.46Z"/>
+          </g>
+        </svg>`,
+      "ai-generated-black": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1789.84 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill-rule: evenodd;
+              }
+
+              .cls-2 {
+                fill: #fff;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M352.84,410.77h1093.16c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H352.84c-85.55,0-145.54,59.94-145.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-2" d="M326.09,341c-.98,0-1.87-.4-2.66-1.19-.8-.8-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.79-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38-.92-.92-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.73-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM369.27,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-2" d="M469.58,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+          <g>
+            <path class="cls-2" d="M639.25,325.87c-8.43,0-15.63-1.41-21.59-4.24-5.97-2.83-10.58-6.95-13.86-12.38-3.27-5.43-5.04-11.99-5.31-19.71-.09-3.85-.13-7.98-.13-12.38s.04-8.56.13-12.51c.27-7.53,2.04-13.94,5.31-19.24,3.27-5.29,7.94-9.35,13.99-12.17,6.05-2.83,13.2-4.24,21.46-4.24,6.64,0,12.46.85,17.49,2.56,5.02,1.7,9.24,3.92,12.65,6.66,3.41,2.74,6.01,5.72,7.8,8.95,1.79,3.23,2.74,6.32,2.83,9.28,0,.81-.27,1.5-.81,2.08-.54.58-1.26.87-2.15.87h-16.68c-.9,0-1.59-.18-2.08-.54-.49-.36-.92-.9-1.28-1.61-.63-1.61-1.64-3.25-3.03-4.91-1.39-1.66-3.25-3.07-5.58-4.24-2.33-1.16-5.38-1.75-9.15-1.75-5.65,0-10.11,1.48-13.39,4.44-3.27,2.96-5.04,7.8-5.31,14.53-.27,7.71-.27,15.56,0,23.54.27,7,2.08,12.02,5.45,15.07,3.36,3.05,7.87,4.57,13.52,4.57,3.68,0,6.97-.65,9.89-1.95,2.91-1.3,5.22-3.34,6.93-6.12,1.7-2.78,2.56-6.32,2.56-10.63v-3.36h-14.66c-.9,0-1.66-.34-2.29-1.01-.63-.67-.94-1.46-.94-2.35v-8.61c0-.99.31-1.79.94-2.42.63-.63,1.39-.94,2.29-.94h32.96c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v14.66c0,7.71-1.68,14.31-5.04,19.77-3.36,5.47-8.16,9.66-14.39,12.58-6.23,2.92-13.52,4.37-21.86,4.37Z"/>
+            <path class="cls-2" d="M710.73,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h60.94c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M805.88,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h12.24c1.34,0,2.33.31,2.96.94.63.63,1.03,1.12,1.21,1.48l35.92,56.1v-55.15c0-.99.31-1.79.94-2.42.63-.63,1.39-.94,2.29-.94h13.72c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v87.44c0,.9-.32,1.68-.94,2.35-.63.67-1.44,1.01-2.42,1.01h-12.38c-1.35,0-2.31-.34-2.89-1.01-.58-.67-1.01-1.14-1.28-1.41l-35.78-54.35v53.41c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-13.59Z"/>
+            <path class="cls-2" d="M912.19,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h60.94c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M1007.35,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h35.65c11.21,0,20.04,2.58,26.5,7.73,6.46,5.16,9.69,12.58,9.69,22.26,0,6.55-1.57,12.02-4.71,16.41-3.14,4.4-7.35,7.67-12.65,9.82l18.97,33.63c.27.54.4,1.03.4,1.48,0,.72-.27,1.37-.81,1.95-.54.58-1.21.87-2.02.87h-14.93c-1.61,0-2.82-.42-3.63-1.28-.81-.85-1.39-1.64-1.75-2.35l-16.41-30.81h-16.28v31.07c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-14.66ZM1025.38,273h17.22c4.93,0,8.59-1.12,10.96-3.36,2.38-2.24,3.56-5.38,3.56-9.42s-1.17-7.22-3.5-9.55c-2.33-2.33-6.01-3.5-11.03-3.5h-17.22v25.83Z"/>
+            <path class="cls-2" d="M1100.62,324.52c-.81,0-1.48-.29-2.02-.87-.54-.58-.81-1.23-.81-1.95,0-.45.04-.85.13-1.21l32.02-86.5c.27-.99.81-1.84,1.61-2.56.81-.72,1.93-1.08,3.36-1.08h17.22c1.43,0,2.56.36,3.36,1.08.81.72,1.35,1.57,1.61,2.56l32.02,86.5c.09.36.13.76.13,1.21,0,.72-.27,1.37-.81,1.95-.54.58-1.21.87-2.02.87h-13.99c-1.35,0-2.33-.31-2.96-.94-.63-.63-1.03-1.21-1.21-1.75l-5.78-15.07h-37.94l-5.78,15.07c-.18.54-.58,1.12-1.21,1.75-.63.63-1.61.94-2.96.94h-13.99ZM1129.54,289.41h27.85l-13.86-38.74-13.99,38.74Z"/>
+            <path class="cls-2" d="M1225.64,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-72.1h-24.48c-.9,0-1.66-.31-2.29-.94-.63-.63-.94-1.39-.94-2.29v-12.11c0-.99.31-1.79.94-2.42.63-.63,1.39-.94,2.29-.94h70.49c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v12.11c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-24.35v72.1c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-14.93Z"/>
+            <path class="cls-2" d="M1298.32,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h60.94c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M1393.48,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h33.77c8.97,0,16.46,1.41,22.46,4.24,6.01,2.83,10.6,6.95,13.79,12.38,3.18,5.43,4.86,12.13,5.04,20.11.09,3.95.13,7.4.13,10.36s-.05,6.37-.13,10.22c-.27,8.34-1.93,15.25-4.98,20.72-3.05,5.47-7.53,9.53-13.45,12.17-5.92,2.65-13.32,3.97-22.2,3.97h-34.44ZM1411.51,307.17h15.74c4.48,0,8.16-.67,11.03-2.02,2.87-1.35,5-3.47,6.39-6.39,1.39-2.91,2.13-6.7,2.22-11.37.09-2.6.16-4.93.2-7,.04-2.06.04-4.12,0-6.19-.05-2.06-.11-4.35-.2-6.86-.18-6.73-1.91-11.68-5.18-14.86-3.27-3.18-8.32-4.78-15.13-4.78h-15.07v59.46Z"/>
+          </g>
+        </svg>`
+    };
+
+    function setStatus(message, isError = false) {
+      els.status.textContent = message;
+      els.status.classList.toggle("error", isError);
+    }
+
+    function imageWidth(image) {
+      return image?.width ?? image?.naturalWidth ?? 0;
+    }
+
+    function imageHeight(image) {
+      return image?.height ?? image?.naturalHeight ?? 0;
+    }
+
+    async function decodeImage(blob) {
+      if ("createImageBitmap" in window) {
+        try {
+          return await createImageBitmap(blob, { imageOrientation: "from-image" });
+        } catch {
+          try {
+            return await createImageBitmap(blob);
+          } catch {
+            // Continue with HTMLImageElement fallback.
+          }
+        }
+      }
+
+      return await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("The browser could not decode this image."));
+        };
+        img.src = url;
+      });
+    }
+
+    async function loadDefaultBadge(defaultKey = els.defaultBadge.value) {
+      const svg = defaultBadgeSvgs[defaultKey] || defaultBadgeSvgs["ai-generated-black-transparent"];
+      const blob = new Blob([svg], { type: "image/svg+xml" });
+      const decoded = await decodeImage(blob);
+      closeImage(badgeImage);
+      badgeImage = decoded;
+    }
+
+    function closeImage(image) {
+      if (image && typeof image.close === "function") image.close();
+    }
+
+    function queueRender() {
+      if (renderQueued) return;
+      renderQueued = true;
+      requestAnimationFrame(() => {
+        renderQueued = false;
+        render();
+      });
+    }
+
+    function getBadgeRect(canvasWidth, canvasHeight) {
+      const badgeW0 = imageWidth(badgeImage);
+      const badgeH0 = imageHeight(badgeImage);
+      if (!badgeW0 || !badgeH0) return null;
+
+      const requestedWidth = canvasWidth * (Number(els.badgeSize.value) / 100);
+      let width = Math.min(requestedWidth, canvasWidth);
+      let height = width * (badgeH0 / badgeW0);
+
+      const maxHeight = canvasHeight * 0.9;
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * (badgeW0 / badgeH0);
+      }
+
+      const margin = Math.max(0, Number(els.margin.value) || 0);
+      const isRight = els.position.value.endsWith("right");
+      const isBottom = els.position.value.startsWith("bottom");
+      let x = isRight ? canvasWidth - width - margin : margin;
+      let y = isBottom ? canvasHeight - height - margin : margin;
+
+      x = Math.max(0, Math.min(x, canvasWidth - width));
+      y = Math.max(0, Math.min(y, canvasHeight - height));
+      return { x, y, width, height };
+    }
+
+    function render() {
+      updateControlLabels();
+      updateMetadataPreview();
+
+      if (!sourceImage) {
+        els.canvas.width = 0;
+        els.canvas.height = 0;
+        els.downloadButton.disabled = true;
+        return;
+      }
+
+      const width = imageWidth(sourceImage);
+      const height = imageHeight(sourceImage);
+      els.canvas.width = width;
+      els.canvas.height = height;
+
+      ctx.save();
+      ctx.clearRect(0, 0, width, height);
+
+      if (els.format.value === "image/jpeg") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      ctx.drawImage(sourceImage, 0, 0, width, height);
+
+      const rect = getBadgeRect(width, height);
+      if (rect && badgeImage) {
+        ctx.globalAlpha = Number(els.opacity.value) / 100;
+        ctx.drawImage(badgeImage, rect.x, rect.y, rect.width, rect.height);
+      }
+
+      ctx.restore();
+      els.downloadButton.disabled = false;
+      const metadataSuffix = sourceMetadata.summary ? ` · ${sourceMetadata.summary}` : "";
+      setStatus(`${width} × ${height} px${metadataSuffix}`);
+    }
+
+    function updateControlLabels() {
+      els.badgeSizeValue.value = `${els.badgeSize.value}%`;
+      els.opacityValue.value = `${els.opacity.value}%`;
+      els.qualityValue.value = `${els.quality.value}%`;
+      els.quality.disabled = !["image/jpeg", "image/webp"].includes(els.format.value);
+    }
+
+    function parseProcessingOperations() {
+      const raw = els.processingOperations.value.trim();
+      if (!raw) return [];
+
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        throw new Error("Processing operations must be a JSON array.");
+      }
+
+      return parsed.map((operation, index) => {
+        if (!operation || Array.isArray(operation) || typeof operation !== "object") {
+          throw new Error(`Processing operation ${index + 1} must be a JSON object.`);
+        }
+
+        const type = typeof operation.type === "string" ? operation.type.trim() : "";
+        const description = typeof operation.description === "string"
+          ? operation.description.trim()
+          : "";
+
+        if (!type) {
+          throw new Error(`Processing operation ${index + 1} requires a non-empty type.`);
+        }
+        if (!description) {
+          throw new Error(`Processing operation ${index + 1} requires a non-empty description.`);
+        }
+
+        return {
+          ...operation,
+          type,
+          description
+        };
+      });
+    }
+
+    function parseCustomMetadata() {
+      const raw = els.customMetadata.value.trim();
+      if (!raw) return {};
+
+      const parsed = JSON.parse(raw);
+      if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
+        throw new Error("Custom metadata must be a JSON object.");
+      }
+      return parsed;
+    }
+
+    function omitNullValues(value) {
+      if (value === null || value === undefined) return undefined;
+
+      if (Array.isArray(value)) {
+        return value
+          .map(item => omitNullValues(item))
+          .filter(item => item !== undefined);
+      }
+
+      if (typeof value === "object") {
+        const result = {};
+        for (const [key, item] of Object.entries(value)) {
+          const cleaned = omitNullValues(item);
+          if (cleaned !== undefined) result[key] = cleaned;
+        }
+        return result;
+      }
+
+      return value;
+    }
+
+    function collectMetadata() {
+      return {
+        title: els.title.value.trim(),
+        description: els.description.value.trim(),
+        digitalSourceType: els.digitalSourceType.value.trim(),
+        aiSystemUsed: els.aiSystemUsed.value.trim(),
+        aiSystemVersionUsed: els.aiSystemVersionUsed.value.trim() || null,
+        aiPromptInformation: els.aiPromptInformation.value.trim(),
+        aiPromptWriterName: els.aiPromptWriterName.value.trim(),
+        aiPromptWriterOrganisation: els.aiPromptWriterOrganisation.value.trim(),
+        creditLine: els.creditLine.value.trim(),
+        disclosure: els.disclosure.value.trim(),
+        processing: {
+          tool: "AI Image Transparency Tool",
+          metadataMode: els.metadataMode.value,
+          badgeId: els.defaultBadge.value,
+          badgePosition: els.position.value,
+          operations: parseProcessingOperations(),
+          exportedAt: new Date().toISOString()
+        },
+        custom: parseCustomMetadata()
+      };
+    }
+
+    function getOutputInfo() {
+      const type = els.format.value;
+      const extension = type === "image/png" ? "png" : type === "image/jpeg" ? "jpg" : "webp";
+      return {
+        type,
+        extension,
+        fileName: `${sourceBaseName}-ai-badge.${extension}`
+      };
+    }
+
+    function deduplicateOperations(operations) {
+      const seen = new Set();
+      const result = [];
+
+      for (const operation of operations) {
+        if (!operation || typeof operation !== "object") continue;
+        const type = typeof operation.type === "string" ? operation.type.trim() : "";
+        const description = typeof operation.description === "string"
+          ? operation.description.trim()
+          : "";
+        if (!type || !description) continue;
+
+        const key = `${type}\u0000${description}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push({ ...operation, type, description });
+      }
+
+      return result;
+    }
+
+    function resolveMetadata(metadata) {
+      if (metadata.processing.metadataMode !== "update") return metadata;
+
+      const existing = extractKnownXmpFields(sourceMetadata.xmp);
+      const prefer = (value, oldValue) => value || oldValue || "";
+      const version = metadata.aiSystemVersionUsed || existing.aiSystemVersionUsed || null;
+      const existingCustom = existing.custom && typeof existing.custom === "object" ? existing.custom : {};
+      const existingOperations = Array.isArray(existing.processing?.operations)
+        ? existing.processing.operations
+        : [];
+      const currentOperations = Array.isArray(metadata.processing.operations)
+        ? metadata.processing.operations
+        : [];
+      const mergedOperations = deduplicateOperations([
+        ...existingOperations,
+        ...currentOperations
+      ]);
+
+      return {
+        ...metadata,
+        title: prefer(metadata.title, existing.title),
+        description: prefer(metadata.description, existing.description),
+        digitalSourceType: prefer(metadata.digitalSourceType, existing.digitalSourceType),
+        aiSystemUsed: prefer(metadata.aiSystemUsed, existing.aiSystemUsed),
+        aiSystemVersionUsed: version,
+        aiPromptInformation: prefer(metadata.aiPromptInformation, existing.aiPromptInformation),
+        aiPromptWriterName: prefer(metadata.aiPromptWriterName, existing.aiPromptWriterName),
+        aiPromptWriterOrganisation: prefer(metadata.aiPromptWriterOrganisation, existing.aiPromptWriterOrganisation),
+        creditLine: prefer(metadata.creditLine, existing.creditLine),
+        disclosure: prefer(metadata.disclosure, existing.disclosure),
+        processing: {
+          ...metadata.processing,
+          operations: mergedOperations
+        },
+        custom: { ...existingCustom, ...metadata.custom }
+      };
+    }
+
+    function extractKnownXmpFields(xmp) {
+      if (!xmp) return {};
+
+      const RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      const DC_NS = "http://purl.org/dc/elements/1.1/";
+      const IPTC_EXT_NS = "http://iptc.org/std/Iptc4xmpExt/2008-02-29/";
+      const PHOTOSHOP_NS = "http://ns.adobe.com/photoshop/1.0/";
+      const AIB_NS = "urn:ai-image-badge:metadata:1.0";
+      const doc = new DOMParser().parseFromString(xmp, "application/xml");
+      if (doc.querySelector("parsererror")) return {};
+
+      const description = doc.getElementsByTagNameNS(RDF_NS, "Description")[0];
+      if (!description) return {};
+
+      const simpleValue = (namespace, localName) => {
+        const attribute = description.getAttributeNS(namespace, localName);
+        if (attribute) return attribute;
+        const element = [...description.children].find(
+          child => child.namespaceURI === namespace && child.localName === localName
+        );
+        return element?.textContent?.trim() || "";
+      };
+
+      const altValue = localName => {
+        const element = [...description.children].find(
+          child => child.namespaceURI === DC_NS && child.localName === localName
+        );
+        if (!element) return description.getAttributeNS(DC_NS, localName) || "";
+        const items = [...element.getElementsByTagNameNS(RDF_NS, "li")];
+        const preferred = items.find(item => item.getAttribute("xml:lang") === "x-default") || items[0];
+        return preferred?.textContent?.trim() || element.textContent?.trim() || "";
+      };
+
+      let processing = null;
+      const processingJson = simpleValue(AIB_NS, "ProcessingJson");
+      if (processingJson) {
+        try {
+          const parsed = JSON.parse(processingJson);
+          if (parsed && !Array.isArray(parsed) && typeof parsed === "object") {
+            processing = parsed;
+          }
+        } catch {
+          // Ignore malformed processing JSON from the source.
+        }
+      }
+
+      let custom = {};
+      const customJson = simpleValue(AIB_NS, "CustomJson");
+      if (customJson) {
+        try {
+          const parsed = JSON.parse(customJson);
+          if (parsed && !Array.isArray(parsed) && typeof parsed === "object") custom = parsed;
+        } catch {
+          // Ignore malformed custom JSON from the source.
+        }
+      }
+
+      return {
+        title: altValue("title"),
+        description: altValue("description"),
+        digitalSourceType: simpleValue(IPTC_EXT_NS, "DigitalSourceType"),
+        aiSystemUsed: simpleValue(IPTC_EXT_NS, "AISystemUsed"),
+        aiSystemVersionUsed: simpleValue(IPTC_EXT_NS, "AISystemVersionUsed") || null,
+        aiPromptInformation: simpleValue(IPTC_EXT_NS, "AIPromptInformation"),
+        aiPromptWriterName: simpleValue(IPTC_EXT_NS, "AIPromptWriterName"),
+        aiPromptWriterOrganisation: simpleValue(AIB_NS, "PromptWriterOrganisation")
+          || simpleValue(IPTC_EXT_NS, "AIPromptWriterOrganisation"),
+        creditLine: simpleValue(PHOTOSHOP_NS, "Credit"),
+        disclosure: simpleValue(AIB_NS, "Disclosure"),
+        processing,
+        custom
+      };
+    }
+
+    function buildXmpFieldReport(metadata) {
+      return omitNullValues({
+        "Iptc4xmpExt:DigitalSourceType": metadata.digitalSourceType || null,
+        "Iptc4xmpExt:AISystemUsed": metadata.aiSystemUsed || null,
+        "Iptc4xmpExt:AISystemVersionUsed": metadata.aiSystemVersionUsed,
+        "Iptc4xmpExt:AIPromptInformation": metadata.aiPromptInformation || null,
+        "Iptc4xmpExt:AIPromptWriterName": metadata.aiPromptWriterName || null,
+        "aib:PromptWriterOrganisation": metadata.aiPromptWriterOrganisation || null,
+        "xmp:CreateDate": metadata.processing.exportedAt,
+        "xmp:ModifyDate": metadata.processing.exportedAt,
+        "xmp:MetadataDate": metadata.processing.exportedAt,
+        "xmp:CreatorTool": metadata.processing.tool,
+        "dc:title": metadata.title || null,
+        "dc:description": metadata.description || null,
+        "photoshop:Credit": metadata.creditLine || null,
+        "aib:Disclosure": metadata.disclosure || null,
+        "aib:ProcessingJson": JSON.stringify(omitNullValues(metadata.processing)),
+        "aib:CustomJson": JSON.stringify(omitNullValues(metadata.custom))
+      });
+    }
+
+    function buildMetadataReport(metadata, exportDetails = null) {
+      const report = {
+        ...(exportDetails ?? {}),
+        title: metadata.title,
+        description: metadata.description,
+        digitalSourceType: metadata.digitalSourceType,
+        aiSystemUsed: metadata.aiSystemUsed,
+        aiSystemVersionUsed: metadata.aiSystemVersionUsed,
+        aiPromptInformation: metadata.aiPromptInformation,
+        aiPromptWriterName: metadata.aiPromptWriterName,
+        aiPromptWriterOrganisation: metadata.aiPromptWriterOrganisation,
+        creditLine: metadata.creditLine,
+        disclosure: metadata.disclosure,
+        processing: metadata.processing,
+        custom: metadata.custom,
+        xmp_fields: buildXmpFieldReport(metadata),
+        security_note: SECURITY_NOTE
+      };
+      return omitNullValues(report);
+    }
+
+    function updateMetadataPreview() {
+      try {
+        const metadata = omitNullValues(resolveMetadata(collectMetadata()));
+        const data = lastExportReport ?? buildMetadataReport(metadata);
+        els.metadataPreview.textContent = JSON.stringify(data, null, 2);
+        els.metadataPreview.style.color = "";
+      } catch (error) {
+        els.metadataPreview.textContent = error.message;
+        els.metadataPreview.style.color = "var(--danger)";
+      }
+    }
+
+    function canvasToBlob(type, quality) {
+      return new Promise((resolve, reject) => {
+        els.canvas.toBlob(
+          blob => blob ? resolve(blob) : reject(new Error("The browser could not encode the image.")),
+          type,
+          quality
+        );
+      });
+    }
+
+    async function downloadResult() {
+      if (!sourceImage) return;
+
+      try {
+        setStatus("Preparing image…");
+        render();
+        const metadata = omitNullValues(resolveMetadata(collectMetadata()));
+        const output = getOutputInfo();
+        const quality = Number(els.quality.value) / 100;
+        const encoded = await canvasToBlob(output.type, quality);
+        const bytes = new Uint8Array(await encoded.arrayBuffer());
+
+        const updateExistingMetadata = els.metadataMode.value === "update";
+        const metadataSource = updateExistingMetadata ? sourceMetadata : emptySourceMetadata();
+        const outputBytes = output.type === "image/png"
+          ? mergePngMetadata(bytes, metadata, metadataSource)
+          : output.type === "image/jpeg"
+            ? mergeJpegMetadata(bytes, metadata, metadataSource)
+            : mergeWebpMetadata(bytes, metadata, metadataSource);
+
+        const hash = await sha256Hex(outputBytes);
+        const containerBlocks = inspectContainerBlocks(outputBytes, output.type);
+        const containerKey = output.type === "image/webp"
+          ? "riff_chunks"
+          : output.type === "image/png"
+            ? "png_chunks"
+            : "jpeg_segments";
+        lastExportReport = buildMetadataReport(metadata, {
+          file: output.fileName,
+          mime_type: output.type,
+          dimensions: {
+            width: els.canvas.width,
+            height: els.canvas.height
+          },
+          sha256: hash,
+          [containerKey]: containerBlocks
+        });
+        updateMetadataPreview();
+
+        const outputBlob = new Blob([outputBytes], { type: output.type });
+        const url = URL.createObjectURL(outputBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = output.fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        setStatus(`Downloaded ${link.download} · SHA-256 ${hash.slice(0, 12)}…`);
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || "Export failed.", true);
+      }
+    }
+
+    async function sha256Hex(bytes) {
+      if (globalThis.crypto?.subtle) {
+        const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+        return [...new Uint8Array(digest)]
+          .map(value => value.toString(16).padStart(2, "0"))
+          .join("");
+      }
+      return sha256HexFallback(bytes);
+    }
+
+    function sha256HexFallback(bytes) {
+      const constants = new Uint32Array([
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+        0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+        0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+        0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+        0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+        0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+        0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+        0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+        0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+      ]);
+
+      const bitLength = bytes.length * 8;
+      const paddedLength = Math.ceil((bytes.length + 9) / 64) * 64;
+      const padded = new Uint8Array(paddedLength);
+      padded.set(bytes);
+      padded[bytes.length] = 0x80;
+      const view = new DataView(padded.buffer);
+      const high = Math.floor(bitLength / 0x100000000);
+      const low = bitLength >>> 0;
+      view.setUint32(paddedLength - 8, high, false);
+      view.setUint32(paddedLength - 4, low, false);
+
+      const hash = new Uint32Array([
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+      ]);
+      const words = new Uint32Array(64);
+      const rotateRight = (value, bits) => (value >>> bits) | (value << (32 - bits));
+
+      for (let offset = 0; offset < paddedLength; offset += 64) {
+        for (let i = 0; i < 16; i++) {
+          words[i] = view.getUint32(offset + i * 4, false);
+        }
+        for (let i = 16; i < 64; i++) {
+          const s0 = rotateRight(words[i - 15], 7) ^ rotateRight(words[i - 15], 18) ^ (words[i - 15] >>> 3);
+          const s1 = rotateRight(words[i - 2], 17) ^ rotateRight(words[i - 2], 19) ^ (words[i - 2] >>> 10);
+          words[i] = (words[i - 16] + s0 + words[i - 7] + s1) >>> 0;
+        }
+
+        let a = hash[0];
+        let b = hash[1];
+        let c = hash[2];
+        let d = hash[3];
+        let e = hash[4];
+        let f = hash[5];
+        let g = hash[6];
+        let h = hash[7];
+
+        for (let i = 0; i < 64; i++) {
+          const sigma1 = rotateRight(e, 6) ^ rotateRight(e, 11) ^ rotateRight(e, 25);
+          const choose = (e & f) ^ (~e & g);
+          const temp1 = (h + sigma1 + choose + constants[i] + words[i]) >>> 0;
+          const sigma0 = rotateRight(a, 2) ^ rotateRight(a, 13) ^ rotateRight(a, 22);
+          const majority = (a & b) ^ (a & c) ^ (b & c);
+          const temp2 = (sigma0 + majority) >>> 0;
+
+          h = g;
+          g = f;
+          f = e;
+          e = (d + temp1) >>> 0;
+          d = c;
+          c = b;
+          b = a;
+          a = (temp1 + temp2) >>> 0;
+        }
+
+        hash[0] = (hash[0] + a) >>> 0;
+        hash[1] = (hash[1] + b) >>> 0;
+        hash[2] = (hash[2] + c) >>> 0;
+        hash[3] = (hash[3] + d) >>> 0;
+        hash[4] = (hash[4] + e) >>> 0;
+        hash[5] = (hash[5] + f) >>> 0;
+        hash[6] = (hash[6] + g) >>> 0;
+        hash[7] = (hash[7] + h) >>> 0;
+      }
+
+      return [...hash]
+        .map(value => value.toString(16).padStart(8, "0"))
+        .join("");
+    }
+
+    function inspectContainerBlocks(bytes, mimeType) {
+      if (mimeType === "image/webp") return inspectWebpChunks(bytes);
+      if (mimeType === "image/png") return inspectPngChunks(bytes);
+      return inspectJpegSegments(bytes);
+    }
+
+    function inspectWebpChunks(bytes) {
+      const chunks = [];
+      if (bytes.length < 12 || readFourCc(bytes, 0) !== "RIFF" || readFourCc(bytes, 8) !== "WEBP") {
+        return chunks;
+      }
+
+      let offset = 12;
+      while (offset + 8 <= bytes.length) {
+        const fourcc = readFourCc(bytes, offset);
+        const size = readUint32le(bytes, offset + 4);
+        const end = offset + 8 + size + (size % 2);
+        if (end > bytes.length) break;
+        chunks.push({ fourcc, size });
+        offset = end;
+      }
+      return chunks;
+    }
+
+    function inspectPngChunks(bytes) {
+      const chunks = [];
+      const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+      if (!bytesStartWith(bytes, signature)) return chunks;
+
+      let offset = 8;
+      while (offset + 12 <= bytes.length) {
+        const size = readUint32be(bytes, offset);
+        const type = String.fromCharCode(...bytes.slice(offset + 4, offset + 8));
+        const end = offset + 12 + size;
+        if (end > bytes.length) break;
+        chunks.push({ type, size });
+        offset = end;
+        if (type === "IEND") break;
+      }
+      return chunks;
+    }
+
+    function inspectJpegSegments(bytes) {
+      const segments = [];
+      if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return segments;
+      segments.push({ marker: "SOI", size: 0 });
+
+      let offset = 2;
+      while (offset + 1 < bytes.length) {
+        if (bytes[offset] !== 0xff) break;
+        while (offset < bytes.length && bytes[offset] === 0xff) offset++;
+        if (offset >= bytes.length) break;
+
+        const marker = bytes[offset++];
+        if (marker === 0xd9) {
+          segments.push({ marker: "EOI", size: 0 });
+          break;
+        }
+        if (marker === 0xda) {
+          if (offset + 2 > bytes.length) break;
+          const size = ((bytes[offset] << 8) | bytes[offset + 1]) - 2;
+          segments.push({ marker: "SOS", size: Math.max(0, size) });
+          break;
+        }
+        if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+          segments.push({ marker: `0xFF${marker.toString(16).toUpperCase().padStart(2, "0")}`, size: 0 });
+          continue;
+        }
+        if (offset + 2 > bytes.length) break;
+        const segmentLength = (bytes[offset] << 8) | bytes[offset + 1];
+        if (segmentLength < 2 || offset + segmentLength > bytes.length) break;
+        segments.push({ marker: jpegMarkerName(marker), size: segmentLength - 2 });
+        offset += segmentLength;
+      }
+      return segments;
+    }
+
+    function jpegMarkerName(marker) {
+      if (marker >= 0xe0 && marker <= 0xef) return `APP${marker - 0xe0}`;
+      if (marker === 0xfe) return "COM";
+      if (marker === 0xdb) return "DQT";
+      if (marker === 0xc4) return "DHT";
+      if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+        return `SOF${marker - 0xc0}`;
+      }
+      return `0xFF${marker.toString(16).toUpperCase().padStart(2, "0")}`;
+    }
+
+    function concatBytes(...arrays) {
+      const size = arrays.reduce((sum, item) => sum + item.length, 0);
+      const result = new Uint8Array(size);
+      let offset = 0;
+      for (const item of arrays) {
+        result.set(item, offset);
+        offset += item.length;
+      }
+      return result;
+    }
+
+    function uint32be(value) {
+      return new Uint8Array([
+        (value >>> 24) & 0xff,
+        (value >>> 16) & 0xff,
+        (value >>> 8) & 0xff,
+        value & 0xff
+      ]);
+    }
+
+    function readUint32be(bytes, offset) {
+      return (
+        (bytes[offset] * 0x1000000) +
+        ((bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3])
+      ) >>> 0;
+    }
+
+    function emptySourceMetadata() {
+      return {
+        mimeType: null,
+        pngChunks: [],
+        jpegSegments: [],
+        webpExif: null,
+        xmp: null,
+        summary: ""
+      };
+    }
+
+    function bytesStartWith(bytes, prefix, offset = 0) {
+      if (offset + prefix.length > bytes.length) return false;
+      for (let i = 0; i < prefix.length; i++) {
+        if (bytes[offset + i] !== prefix[i]) return false;
+      }
+      return true;
+    }
+
+    function findZero(bytes, start) {
+      for (let i = start; i < bytes.length; i++) {
+        if (bytes[i] === 0) return i;
+      }
+      return -1;
+    }
+
+    function parsePngTextChunk(type, data) {
+      const keywordEnd = findZero(data, 0);
+      if (keywordEnd < 1) return { keyword: null, text: null };
+
+      const keyword = latin1Decoder.decode(data.slice(0, keywordEnd));
+      if (type === "tEXt") {
+        return {
+          keyword,
+          text: latin1Decoder.decode(data.slice(keywordEnd + 1))
+        };
+      }
+
+      if (type === "zTXt") {
+        return { keyword, text: null };
+      }
+
+      if (type === "iTXt") {
+        let offset = keywordEnd + 1;
+        if (offset + 2 > data.length) return { keyword, text: null };
+        const compressed = data[offset] === 1;
+        offset += 2;
+
+        const languageEnd = findZero(data, offset);
+        if (languageEnd < 0) return { keyword, text: null };
+        offset = languageEnd + 1;
+
+        const translatedEnd = findZero(data, offset);
+        if (translatedEnd < 0) return { keyword, text: null };
+        offset = translatedEnd + 1;
+
+        return {
+          keyword,
+          text: compressed ? null : utf8Decoder.decode(data.slice(offset))
+        };
+      }
+
+      return { keyword: null, text: null };
+    }
+
+    function sanitizeTiffMetadata(tiffBytes) {
+      const bytes = tiffBytes.slice();
+      if (bytes.length < 8) return bytes;
+
+      const littleEndian = bytes[0] === 0x49 && bytes[1] === 0x49;
+      const bigEndian = bytes[0] === 0x4d && bytes[1] === 0x4d;
+      if (!littleEndian && !bigEndian) return bytes;
+
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      const get16 = offset => view.getUint16(offset, littleEndian);
+      const get32 = offset => view.getUint32(offset, littleEndian);
+      const set16 = (offset, value) => view.setUint16(offset, value, littleEndian);
+      const set32 = (offset, value) => view.setUint32(offset, value, littleEndian);
+
+      try {
+        if (get16(2) !== 42) return bytes;
+        const ifdOffset = get32(4);
+        if (ifdOffset + 2 > bytes.length) return bytes;
+
+        const entryCount = get16(ifdOffset);
+        const entriesStart = ifdOffset + 2;
+        const entriesEnd = entriesStart + entryCount * 12;
+        if (entriesEnd + 4 > bytes.length) return bytes;
+
+        for (let i = 0; i < entryCount; i++) {
+          const entry = entriesStart + i * 12;
+          const tag = get16(entry);
+          const type = get16(entry + 2);
+          const count = get32(entry + 4);
+          if (tag === 0x0112 && type === 3 && count === 1) {
+            set16(entry + 8, 1);
+          }
+        }
+
+        // Drop IFD1 so an embedded thumbnail cannot show the unbadged source image.
+        set32(entriesEnd, 0);
+      } catch {
+        return tiffBytes.slice();
+      }
+
+      return bytes;
+    }
+
+    const crcTable = (() => {
+      const table = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) {
+          c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+        }
+        table[n] = c >>> 0;
+      }
+      return table;
+    })();
+
+    function crc32(bytes) {
+      let crc = 0xffffffff;
+      for (const byte of bytes) {
+        crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+      }
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    function makePngChunk(type, data) {
+      const typeBytes = utf8.encode(type);
+      const crcInput = concatBytes(typeBytes, data);
+      return concatBytes(
+        uint32be(data.length),
+        typeBytes,
+        data,
+        uint32be(crc32(crcInput))
+      );
+    }
+
+    function makeITXtChunk(keyword, value) {
+      const keywordBytes = utf8.encode(keyword);
+      const textBytes = utf8.encode(String(value));
+      const data = concatBytes(
+        keywordBytes,
+        new Uint8Array([0, 0, 0, 0, 0]),
+        textBytes
+      );
+      return makePngChunk("iTXt", data);
+    }
+
+    function parsePngSourceMetadata(pngBytes) {
+      const result = emptySourceMetadata();
+      result.mimeType = "image/png";
+      const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+      if (!bytesStartWith(pngBytes, signature)) return result;
+
+      const metadataTypes = new Set(["tEXt", "zTXt", "iTXt", "eXIf", "pHYs", "tIME"]);
+      let offset = 8;
+
+      while (offset + 12 <= pngBytes.length) {
+        const length = readUint32be(pngBytes, offset);
+        const end = offset + 12 + length;
+        if (end > pngBytes.length) break;
+
+        const type = String.fromCharCode(...pngBytes.slice(offset + 4, offset + 8));
+        const data = pngBytes.slice(offset + 8, offset + 8 + length);
+        let keyword = null;
+        let raw = pngBytes.slice(offset, end);
+
+        if (["tEXt", "zTXt", "iTXt"].includes(type)) {
+          const parsed = parsePngTextChunk(type, data);
+          keyword = parsed.keyword;
+          if (keyword === "XML:com.adobe.xmp" && parsed.text) {
+            result.xmp = parsed.text;
+            offset = end;
+            continue;
+          }
+          if (keyword === "XML:com.adobe.xmp" && !parsed.text) {
+            // Preserve compressed XMP even though this zero-dependency tool cannot merge it.
+            keyword = "XML:com.adobe.xmp:compressed";
+          }
+        } else if (type === "eXIf") {
+          raw = makePngChunk("eXIf", sanitizeTiffMetadata(data));
+        }
+
+        if (metadataTypes.has(type)) {
+          result.pngChunks.push({ type, keyword, raw });
+        }
+
+        offset = end;
+        if (type === "IEND") break;
+      }
+
+      const count = result.pngChunks.length + (result.xmp ? 1 : 0);
+      result.summary = count ? `${count} source metadata block${count === 1 ? "" : "s"} detected` : "no source metadata detected";
+      return result;
+    }
+
+    function makeJpegSegment(marker, payload) {
+      const length = payload.length + 2;
+      if (length > 65535) throw new Error("JPEG metadata is too large for one segment.");
+      return concatBytes(
+        new Uint8Array([0xff, marker, (length >> 8) & 0xff, length & 0xff]),
+        payload
+      );
+    }
+
+    function parseJpegSourceMetadata(jpegBytes) {
+      const result = emptySourceMetadata();
+      result.mimeType = "image/jpeg";
+      if (jpegBytes.length < 4 || jpegBytes[0] !== 0xff || jpegBytes[1] !== 0xd8) return result;
+
+      const xmpHeader = utf8.encode("http://ns.adobe.com/xap/1.0/\0");
+      const extendedXmpHeader = utf8.encode("http://ns.adobe.com/xmp/extension/\0");
+      const exifHeader = new Uint8Array([0x45, 0x78, 0x69, 0x66, 0, 0]);
+      let offset = 2;
+
+      while (offset + 1 < jpegBytes.length) {
+        if (jpegBytes[offset] !== 0xff) break;
+        const markerStart = offset;
+        while (offset < jpegBytes.length && jpegBytes[offset] === 0xff) offset++;
+        if (offset >= jpegBytes.length) break;
+
+        const marker = jpegBytes[offset++];
+        if (marker === 0xda || marker === 0xd9) break;
+        if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) continue;
+        if (offset + 2 > jpegBytes.length) break;
+
+        const length = (jpegBytes[offset] << 8) | jpegBytes[offset + 1];
+        if (length < 2 || offset + length > jpegBytes.length) break;
+        const payload = jpegBytes.slice(offset + 2, offset + length);
+        const raw = jpegBytes.slice(markerStart, offset + length);
+
+        if (marker === 0xe1 && bytesStartWith(payload, xmpHeader)) {
+          result.xmp = utf8Decoder.decode(payload.slice(xmpHeader.length));
+        } else if (marker === 0xe1 && bytesStartWith(payload, extendedXmpHeader)) {
+          result.jpegSegments.push(raw);
+        } else if (marker === 0xe1 && bytesStartWith(payload, exifHeader)) {
+          const sanitizedPayload = concatBytes(
+            exifHeader,
+            sanitizeTiffMetadata(payload.slice(exifHeader.length))
+          );
+          result.jpegSegments.push(makeJpegSegment(0xe1, sanitizedPayload));
+        } else if (marker === 0xfe) {
+          result.jpegSegments.push(raw);
+        }
+
+        offset += length;
+      }
+
+      const count = result.jpegSegments.length + (result.xmp ? 1 : 0);
+      result.summary = count ? `${count} source metadata block${count === 1 ? "" : "s"} detected` : "no source metadata detected";
+      return result;
+    }
+
+
+    function readUint32le(bytes, offset) {
+      return (
+        bytes[offset] |
+        (bytes[offset + 1] << 8) |
+        (bytes[offset + 2] << 16) |
+        (bytes[offset + 3] * 0x1000000)
+      ) >>> 0;
+    }
+
+    function writeUint24le(value) {
+      return new Uint8Array([
+        value & 0xff,
+        (value >>> 8) & 0xff,
+        (value >>> 16) & 0xff
+      ]);
+    }
+
+    function writeUint32le(value) {
+      return new Uint8Array([
+        value & 0xff,
+        (value >>> 8) & 0xff,
+        (value >>> 16) & 0xff,
+        (value >>> 24) & 0xff
+      ]);
+    }
+
+    function asciiBytes(value) {
+      return new Uint8Array([...value].map(char => char.charCodeAt(0)));
+    }
+
+    function readFourCc(bytes, offset) {
+      return String.fromCharCode(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+    }
+
+    function makeWebpChunk(type, payload) {
+      const padding = payload.length % 2 ? new Uint8Array([0]) : new Uint8Array();
+      return concatBytes(asciiBytes(type), writeUint32le(payload.length), payload, padding);
+    }
+
+    function parseWebpSourceMetadata(webpBytes) {
+      const result = emptySourceMetadata();
+      result.mimeType = "image/webp";
+      if (
+        webpBytes.length < 12 ||
+        readFourCc(webpBytes, 0) !== "RIFF" ||
+        readFourCc(webpBytes, 8) !== "WEBP"
+      ) return result;
+
+      let offset = 12;
+      while (offset + 8 <= webpBytes.length) {
+        const type = readFourCc(webpBytes, offset);
+        const length = readUint32le(webpBytes, offset + 4);
+        const dataStart = offset + 8;
+        const dataEnd = dataStart + length;
+        if (dataEnd > webpBytes.length) break;
+        const payload = webpBytes.slice(dataStart, dataEnd);
+
+        if (type === "EXIF") {
+          result.webpExif = sanitizeTiffMetadata(payload);
+        } else if (type === "XMP ") {
+          result.xmp = utf8Decoder.decode(payload);
+        }
+
+        offset = dataEnd + (length % 2);
+      }
+
+      const count = (result.webpExif ? 1 : 0) + (result.xmp ? 1 : 0);
+      result.summary = count ? `${count} source metadata block${count === 1 ? "" : "s"} detected` : "no source metadata detected";
+      return result;
+    }
+
+    function analyzeSourceMetadata(bytes, mimeType) {
+      if (mimeType === "image/png") return parsePngSourceMetadata(bytes);
+      if (mimeType === "image/jpeg") return parseJpegSourceMetadata(bytes);
+      if (mimeType === "image/webp") return parseWebpSourceMetadata(bytes);
+      return emptySourceMetadata();
+    }
+
+    function removeDirectChildren(parent, namespace, localName) {
+      for (const child of [...parent.children]) {
+        if (child.namespaceURI === namespace && child.localName === localName) {
+          child.remove();
+        }
+      }
+    }
+
+    function ensureNamespace(element, prefix, namespace) {
+      element.setAttributeNS("http://www.w3.org/2000/xmlns/", `xmlns:${prefix}`, namespace);
+    }
+
+    function appendSimpleElement(doc, parent, namespace, qualifiedName, value) {
+      const element = doc.createElementNS(namespace, qualifiedName);
+      element.textContent = value;
+      parent.appendChild(element);
+      return element;
+    }
+
+    function buildOrUpdateXmpPacket(existingXmp, metadata, format) {
+      const RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      const DC_NS = "http://purl.org/dc/elements/1.1/";
+      const XMP_NS = "http://ns.adobe.com/xap/1.0/";
+      const TIFF_NS = "http://ns.adobe.com/tiff/1.0/";
+      const IPTC_EXT_NS = "http://iptc.org/std/Iptc4xmpExt/2008-02-29/";
+      const PHOTOSHOP_NS = "http://ns.adobe.com/photoshop/1.0/";
+      const AIB_NS = "urn:ai-image-badge:metadata:1.0";
+      const XML_NS = "http://www.w3.org/XML/1998/namespace";
+      const parser = new DOMParser();
+
+      let doc = null;
+      if (existingXmp) {
+        const parsed = parser.parseFromString(existingXmp, "application/xml");
+        if (!parsed.querySelector("parsererror") && parsed.getElementsByTagNameNS(RDF_NS, "RDF").length) {
+          doc = parsed;
+        }
+      }
+
+      if (!doc) {
+        doc = parser.parseFromString(
+          `<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="${RDF_NS}"><rdf:Description rdf:about=""/></rdf:RDF></x:xmpmeta>`,
+          "application/xml"
+        );
+      }
+
+      const rdf = doc.getElementsByTagNameNS(RDF_NS, "RDF")[0];
+      let description = rdf.getElementsByTagNameNS(RDF_NS, "Description")[0];
+      if (!description) {
+        description = doc.createElementNS(RDF_NS, "rdf:Description");
+        description.setAttributeNS(RDF_NS, "rdf:about", "");
+        rdf.appendChild(description);
+      }
+
+      ensureNamespace(description, "dc", DC_NS);
+      ensureNamespace(description, "xmp", XMP_NS);
+      ensureNamespace(description, "tiff", TIFF_NS);
+      ensureNamespace(description, "Iptc4xmpExt", IPTC_EXT_NS);
+      ensureNamespace(description, "photoshop", PHOTOSHOP_NS);
+      ensureNamespace(description, "aib", AIB_NS);
+
+      description.setAttributeNS(XMP_NS, "xmp:CreatorTool", metadata.processing.tool);
+      description.setAttributeNS(XMP_NS, "xmp:CreateDate", metadata.processing.exportedAt);
+      description.setAttributeNS(XMP_NS, "xmp:ModifyDate", metadata.processing.exportedAt);
+      description.setAttributeNS(XMP_NS, "xmp:MetadataDate", metadata.processing.exportedAt);
+      description.setAttributeNS(TIFF_NS, "tiff:Orientation", "1");
+
+      replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:DigitalSourceType", metadata.digitalSourceType);
+      replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AISystemUsed", metadata.aiSystemUsed);
+      replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AISystemVersionUsed", metadata.aiSystemVersionUsed);
+      replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AIPromptInformation", metadata.aiPromptInformation);
+      replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AIPromptWriterName", metadata.aiPromptWriterName);
+      replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AIPromptWriterOrganisation", null);
+      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:PromptWriterOrganisation", metadata.aiPromptWriterOrganisation);
+      replaceSimpleXmpProperty(doc, description, PHOTOSHOP_NS, "photoshop:Credit", metadata.creditLine);
+      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:Disclosure", metadata.disclosure);
+      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:ProcessingJson", JSON.stringify(omitNullValues(metadata.processing)));
+      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:CustomJson", JSON.stringify(omitNullValues(metadata.custom)));
+      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:MetadataJson", JSON.stringify(omitNullValues(metadata)));
+
+      description.removeAttributeNS(DC_NS, "format");
+      removeDirectChildren(description, DC_NS, "format");
+      appendSimpleElement(doc, description, DC_NS, "dc:format", format);
+
+      removeDirectChildren(description, DC_NS, "title");
+      description.removeAttributeNS(DC_NS, "title");
+      if (metadata.title) {
+
+        const title = doc.createElementNS(DC_NS, "dc:title");
+        const alt = doc.createElementNS(RDF_NS, "rdf:Alt");
+        const item = doc.createElementNS(RDF_NS, "rdf:li");
+        item.setAttributeNS(XML_NS, "xml:lang", "x-default");
+        item.textContent = metadata.title;
+        alt.appendChild(item);
+        title.appendChild(alt);
+        description.appendChild(title);
+      }
+
+      removeDirectChildren(description, DC_NS, "description");
+      description.removeAttributeNS(DC_NS, "description");
+      if (metadata.description) {
+
+        const descriptionElement = doc.createElementNS(DC_NS, "dc:description");
+        const alt = doc.createElementNS(RDF_NS, "rdf:Alt");
+        const item = doc.createElementNS(RDF_NS, "rdf:li");
+        item.setAttributeNS(XML_NS, "xml:lang", "x-default");
+        item.textContent = metadata.description;
+        alt.appendChild(item);
+        descriptionElement.appendChild(alt);
+        description.appendChild(descriptionElement);
+      }
+
+      let serialized = new XMLSerializer().serializeToString(doc);
+      if (!serialized.includes("<?xpacket")) {
+        serialized = `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>\n${serialized}\n<?xpacket end="w"?>`;
+      }
+      return serialized;
+    }
+
+    function replaceSimpleXmpProperty(doc, description, namespace, qualifiedName, value, preserveWhenEmpty = false) {
+      if (!value && preserveWhenEmpty) return;
+      const localName = qualifiedName.split(":").pop();
+      description.removeAttributeNS(namespace, localName);
+      removeDirectChildren(description, namespace, localName);
+      if (value) appendSimpleElement(doc, description, namespace, qualifiedName, value);
+    }
+
+    function pngKeywordShouldBeReplaced(keyword) {
+      return new Set([
+        "XML:com.adobe.xmp",
+        "Title",
+        "Description",
+        "DigitalSourceType",
+        "AISystemUsed",
+        "AISystemVersionUsed",
+        "AIPromptInformation",
+        "AIPromptWriterName",
+        "AIPromptWriterOrganisation",
+        "CreditLine",
+        "Disclosure",
+        "Processing",
+        "Custom",
+        "MetadataJson",
+        "Software"
+      ]).has(keyword);
+    }
+
+    function mergePngMetadata(pngBytes, metadata, source) {
+      const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+      if (!bytesStartWith(pngBytes, signature)) {
+        throw new Error("The encoded PNG is invalid.");
+      }
+
+      const chunks = [];
+      if (source.mimeType === "image/png") {
+        for (const chunk of source.pngChunks) {
+          if (!pngKeywordShouldBeReplaced(chunk.keyword)) {
+            chunks.push(chunk.raw);
+          }
+        }
+      }
+
+      if (metadata.title) chunks.push(makeITXtChunk("Title", metadata.title));
+      if (metadata.description) chunks.push(makeITXtChunk("Description", metadata.description));
+      if (metadata.digitalSourceType) chunks.push(makeITXtChunk("DigitalSourceType", metadata.digitalSourceType));
+      if (metadata.aiSystemUsed) chunks.push(makeITXtChunk("AISystemUsed", metadata.aiSystemUsed));
+      if (metadata.aiSystemVersionUsed) chunks.push(makeITXtChunk("AISystemVersionUsed", metadata.aiSystemVersionUsed));
+      if (metadata.aiPromptInformation) chunks.push(makeITXtChunk("AIPromptInformation", metadata.aiPromptInformation));
+      if (metadata.aiPromptWriterName) chunks.push(makeITXtChunk("AIPromptWriterName", metadata.aiPromptWriterName));
+      if (metadata.aiPromptWriterOrganisation) chunks.push(makeITXtChunk("AIPromptWriterOrganisation", metadata.aiPromptWriterOrganisation));
+      if (metadata.creditLine) chunks.push(makeITXtChunk("CreditLine", metadata.creditLine));
+      if (metadata.disclosure) chunks.push(makeITXtChunk("Disclosure", metadata.disclosure));
+      chunks.push(makeITXtChunk("Processing", JSON.stringify(omitNullValues(metadata.processing))));
+      chunks.push(makeITXtChunk("Custom", JSON.stringify(omitNullValues(metadata.custom))));
+      chunks.push(makeITXtChunk("MetadataJson", JSON.stringify(omitNullValues(metadata))));
+      chunks.push(makeITXtChunk("Software", metadata.processing.tool));
+      chunks.push(makeITXtChunk(
+        "XML:com.adobe.xmp",
+        buildOrUpdateXmpPacket(source.xmp, metadata, "image/png")
+      ));
+
+      let offset = 8;
+      while (offset + 12 <= pngBytes.length) {
+        const length = readUint32be(pngBytes, offset);
+        const type = String.fromCharCode(...pngBytes.slice(offset + 4, offset + 8));
+        if (type === "IDAT" || type === "IEND") {
+          return concatBytes(
+            pngBytes.slice(0, offset),
+            ...chunks,
+            pngBytes.slice(offset)
+          );
+        }
+        offset += 12 + length;
+      }
+
+      throw new Error("PNG image data was not found.");
+    }
+
+    function findJpegMetadataInsertOffset(jpegBytes) {
+      let insertAt = 2;
+      if (jpegBytes.length >= 6 && jpegBytes[2] === 0xff && jpegBytes[3] === 0xe0) {
+        const app0Length = (jpegBytes[4] << 8) | jpegBytes[5];
+        const candidate = 4 + app0Length;
+        if (app0Length >= 2 && candidate <= jpegBytes.length) insertAt = candidate;
+      }
+      return insertAt;
+    }
+
+    function mergeJpegMetadata(jpegBytes, metadata, source) {
+      if (jpegBytes.length < 4 || jpegBytes[0] !== 0xff || jpegBytes[1] !== 0xd8) {
+        throw new Error("The encoded JPEG is invalid.");
+      }
+
+      const xmpHeader = utf8.encode("http://ns.adobe.com/xap/1.0/\0");
+      const packet = utf8.encode(buildOrUpdateXmpPacket(source.xmp, metadata, "image/jpeg"));
+      const xmpSegment = makeJpegSegment(0xe1, concatBytes(xmpHeader, packet));
+      const preservedSegments = source.mimeType === "image/jpeg" ? source.jpegSegments : [];
+      const insertAt = findJpegMetadataInsertOffset(jpegBytes);
+
+      return concatBytes(
+        jpegBytes.slice(0, insertAt),
+        ...preservedSegments,
+        xmpSegment,
+        jpegBytes.slice(insertAt)
+      );
+    }
+
+
+    function mergeWebpMetadata(webpBytes, metadata, source) {
+      if (
+        webpBytes.length < 12 ||
+        readFourCc(webpBytes, 0) !== "RIFF" ||
+        readFourCc(webpBytes, 8) !== "WEBP"
+      ) {
+        throw new Error("The encoded WebP is invalid or WebP export is unsupported by this browser.");
+      }
+
+      const imageChunks = [];
+      let existingVp8x = null;
+      let hasAlpha = false;
+      let offset = 12;
+
+      while (offset + 8 <= webpBytes.length) {
+        const type = readFourCc(webpBytes, offset);
+        const length = readUint32le(webpBytes, offset + 4);
+        const dataStart = offset + 8;
+        const dataEnd = dataStart + length;
+        const paddedEnd = dataEnd + (length % 2);
+        if (paddedEnd > webpBytes.length) break;
+        const payload = webpBytes.slice(dataStart, dataEnd);
+        const raw = webpBytes.slice(offset, paddedEnd);
+
+        if (type === "VP8X") {
+          existingVp8x = payload;
+          hasAlpha = hasAlpha || Boolean(payload[0] & 0x10);
+        } else if (type === "ALPH") {
+          hasAlpha = true;
+          imageChunks.push(raw);
+        } else if (type === "VP8L") {
+          if (payload.length >= 5 && payload[0] === 0x2f) {
+            const packed = readUint32le(payload, 1);
+            hasAlpha = hasAlpha || Boolean((packed >>> 28) & 1);
+          }
+          imageChunks.push(raw);
+        } else if (type !== "EXIF" && type !== "XMP ") {
+          imageChunks.push(raw);
+        }
+
+        offset = paddedEnd;
+      }
+
+      let flags = existingVp8x?.[0] || 0;
+      flags &= ~(0x08 | 0x04); // Replace EXIF and XMP flags.
+      if (hasAlpha) flags |= 0x10;
+      if (source.mimeType === "image/webp" && source.webpExif) flags |= 0x08;
+      flags |= 0x04; // This tool always writes an XMP packet.
+
+      const widthMinusOne = Math.max(0, els.canvas.width - 1);
+      const heightMinusOne = Math.max(0, els.canvas.height - 1);
+      const vp8xPayload = concatBytes(
+        new Uint8Array([flags, 0, 0, 0]),
+        writeUint24le(widthMinusOne),
+        writeUint24le(heightMinusOne)
+      );
+
+      const metadataChunks = [];
+      if (source.mimeType === "image/webp" && source.webpExif) {
+        metadataChunks.push(makeWebpChunk("EXIF", source.webpExif));
+      }
+      metadataChunks.push(makeWebpChunk(
+        "XMP ",
+        utf8.encode(buildOrUpdateXmpPacket(source.xmp, metadata, "image/webp"))
+      ));
+
+      const body = concatBytes(
+        asciiBytes("WEBP"),
+        makeWebpChunk("VP8X", vp8xPayload),
+        ...imageChunks,
+        ...metadataChunks
+      );
+
+      return concatBytes(asciiBytes("RIFF"), writeUint32le(body.length), body);
+    }
+
+    els.sourceFile.addEventListener("change", async event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+        setStatus("Please choose a PNG, JPEG or WebP source image.", true);
+        return;
+      }
+
+      try {
+        setStatus("Loading source image…");
+        const fileBytes = new Uint8Array(await file.arrayBuffer());
+        const decoded = await decodeImage(file);
+        closeImage(sourceImage);
+        sourceImage = decoded;
+        sourceBytes = fileBytes;
+        sourceMimeType = file.type;
+        sourceMetadata = analyzeSourceMetadata(fileBytes, file.type);
+        sourceBaseName = file.name.replace(/\.[^.]+$/, "") || "image";
+        lastExportReport = null;
+        queueRender();
+      } catch (error) {
+        sourceBytes = null;
+        sourceMimeType = null;
+        sourceMetadata = emptySourceMetadata();
+        setStatus(error.message, true);
+      }
+    });
+
+    els.defaultBadge.addEventListener("change", async () => {
+      try {
+        setStatus("Loading built-in badge…");
+        await loadDefaultBadge();
+        lastExportReport = null;
+        queueRender();
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    });
+
+    els.downloadButton.addEventListener("click", downloadResult);
+
+    for (const element of [
+      els.defaultBadge,
+      els.position,
+      els.margin,
+      els.badgeSize,
+      els.opacity,
+      els.digitalSourceType,
+      els.aiSystemUsed,
+      els.aiSystemVersionUsed,
+      els.aiPromptInformation,
+      els.aiPromptWriterName,
+      els.aiPromptWriterOrganisation,
+      els.title,
+      els.description,
+      els.creditLine,
+      els.disclosure,
+      els.processingOperations,
+      els.customMetadata,
+      els.metadataMode,
+      els.format,
+      els.quality
+    ]) {
+      const invalidateAndRender = () => {
+        lastExportReport = null;
+        queueRender();
+      };
+      element.addEventListener("input", invalidateAndRender);
+      element.addEventListener("change", invalidateAndRender);
+    }
+
+    window.addEventListener("beforeunload", () => {
+      closeImage(sourceImage);
+      closeImage(badgeImage);
+    });
+
+    loadDefaultBadge()
+      .then(queueRender)
+      .catch(error => setStatus(error.message, true));
+  </script>
+</body>
+
+</html>
