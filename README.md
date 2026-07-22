@@ -10,7 +10,7 @@ The tool runs entirely in the browser. Images are processed locally and are not 
 * Adds a configurable AI-generated disclosure badge
 * Writes [IPTC Photo Metadata](https://iptc.org/standards/photo-metadata/) and [XMP](https://developer.adobe.com/xmp/docs/) metadata
 * Preserves supported existing metadata in update mode
-* Supports information about the AI system, prompt, prompt author, organisation and credit line
+* Supports information about the AI system, prompt, prompt author and credit line
 * Records additional processing operations
 * Exports the processed image directly in the browser
 * Requires no backend or external service

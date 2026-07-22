@@ -4,8 +4,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#6d4aff" />
   <title>AI Image Transparency Tool</title>
-  <meta name="description" content="A browser-based tool for adding a visible AI disclosure badge and transparency metadata to PNG, JPEG and WebP images." />
+  <meta name="description"
+    content="A browser-based tool for adding a visible AI disclosure badge and transparency metadata to PNG, JPEG and WebP images." />
   <meta name="author" content="STÜBER SYSTEMS GmbH" />
   <meta name="application-name" content="AI Image Transparency Tool" />
   <link rel="canonical" href="https://openpotato.github.io/ai-image-transparency-tool/" />
@@ -14,33 +16,43 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="OpenPotato" />
   <meta property="og:title" content="AI Image Transparency Tool" />
-  <meta property="og:description" content="Add a visible AI disclosure badge and transparency metadata directly in your browser." />
+  <meta property="og:description"
+    content="Add a visible AI disclosure badge and transparency metadata directly in your browser." />
   <meta property="og:url" content="https://openpotato.github.io/ai-image-transparency-tool/" />
   <meta property="og:locale" content="en_US" />
 
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f3f5f7;
-      --panel: #ffffff;
-      --text: #17202a;
-      --muted: #667085;
-      --border: #d0d5dd;
-      --accent: #2563eb;
+      --bg: #f6f6fb;
+      --surface: #ffffff;
+      --surface-muted: #f1f0f8;
+      --text: #171624;
+      --muted: #66637a;
+      --border: #dfddea;
+      --primary: #6d4aff;
+      --primary-dark: #5233dc;
+      --primary-soft: #eee9ff;
+      --success: #127a58;
       --danger: #b42318;
-      --shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+      --shadow: 0 14px 45px rgba(43, 37, 85, .08);
+      --radius: 18px;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #101318;
-        --panel: #181d24;
-        --text: #f5f7fa;
-        --muted: #a7b0be;
-        --border: #394150;
-        --accent: #7aa2ff;
+        --bg: #111018;
+        --surface: #1b1925;
+        --surface-muted: #242131;
+        --text: #f5f3ff;
+        --muted: #aaa5bd;
+        --border: #353145;
+        --primary: #9c87ff;
+        --primary-dark: #b5a6ff;
+        --primary-soft: #2b2548;
+        --success: #61d6ac;
         --danger: #ff8a80;
-        --shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        --shadow: 0 18px 55px rgba(0, 0, 0, .28);
       }
     }
 
@@ -48,65 +60,229 @@
       box-sizing: border-box;
     }
 
+    html {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text);
     }
 
-    .app {
-      width: min(1280px, calc(100% - 32px));
-      margin: 24px auto;
-      display: grid;
-      grid-template-columns: minmax(320px, 410px) minmax(0, 1fr);
-      align-items: start;
-      gap: 20px;
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin-inline: auto;
     }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
+    .site-header {
+      padding: 52px 0 42px;
+      background:
+        radial-gradient(circle at 88% 15%, rgba(255, 255, 255, .22), transparent 22%),
+        linear-gradient(130deg, #2c176f, #6d4aff 58%, #925eff);
+      color: #fff;
     }
 
-    .controls {
-      padding: 22px;
-      align-self: start;
-    }
-
-    .preview-panel {
-      position: sticky;
-      top: 24px;
-      align-self: start;
-      padding: 18px;
-      min-height: 0;
-      max-height: calc(100vh - 48px);
+    .header-inner {
       display: flex;
-      flex-direction: column;
-      gap: 14px;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: .76rem;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .site-header .eyebrow {
+      color: rgba(255, 255, 255, .72);
     }
 
     h1 {
-      margin: 0 0 6px;
-      font-size: 1.45rem;
+      margin: 4px 0 12px;
+      font-size: clamp(2.1rem, 5vw, 4rem);
+      line-height: 1.04;
+      letter-spacing: -.04em;
     }
 
-    h2 {
-      margin: 22px 0 12px;
-      font-size: 1rem;
+    .subtitle {
+      max-width: 760px;
+      margin: 0;
+      font-size: 1.08rem;
+      color: rgba(255, 255, 255, .82);
+    }
+
+    .privacy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      padding: 9px 13px;
+      border: 1px solid rgba(255, 255, 255, .28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .12);
+      font-size: .88rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .privacy-pill svg {
+      width: 18px;
+      fill: currentColor;
+    }
+
+    .app {
+      padding: 34px 0 64px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+      gap: 18px;
+    }
+
+    .card {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .card--full {
+      grid-column: 1 / -1;
+    }
+
+    .card-section {
+      padding: 24px;
+    }
+
+    .card-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-heading h2 {
+      margin: 3px 0 0;
+      font-size: 1.22rem;
+      line-height: 1.25;
+    }
+
+    .card-description {
+      margin-top: 5px;
+      font-size: .9rem;
     }
 
     p {
       margin: 0;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.5;
+    }
+
+    .source-card,
+    .badge-card {
+      align-self: stretch;
+    }
+
+    .source-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .source-card .drop-zone {
+      flex: 1;
+    }
+
+    .drop-zone {
+      min-height: 218px;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 2px dashed #a89bdd;
+      border-radius: 16px;
+      outline: none;
+      background: var(--surface-muted);
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone:focus-visible,
+    .drop-zone.drag-over {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .drop-zone:focus-visible {
+      box-shadow: var(--shadow), 0 0 0 4px color-mix(in srgb, var(--primary), transparent 78%);
+    }
+
+    .drop-zone.has-file {
+      border-style: solid;
+      border-color: color-mix(in srgb, var(--primary), var(--border) 42%);
+    }
+
+    .drop-zone h2 {
+      margin: 14px 0 4px;
+      font-size: 1.45rem;
+      line-height: 1.25;
+    }
+
+    .drop-zone p {
+      margin: 0 0 8px;
+    }
+
+    .drop-zone small {
+      max-width: 100%;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .drop-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .drop-icon svg {
+      width: 28px;
+      fill: currentColor;
+    }
+
+    .link-like {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
     .field {
       margin-top: 14px;
+    }
+
+    .card-heading+.field,
+    .card-heading+.field-row {
+      margin-top: 0;
     }
 
     .field-row {
@@ -118,8 +294,8 @@
     label {
       display: block;
       margin-bottom: 6px;
-      font-size: 0.86rem;
-      font-weight: 650;
+      font-size: .86rem;
+      font-weight: 680;
     }
 
     input,
@@ -135,20 +311,53 @@
     input[type="number"],
     select,
     textarea {
+      min-height: 42px;
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 10px 11px;
-      background: var(--panel);
+      outline: none;
+      background: var(--surface);
       color: var(--text);
+      transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    input[type="file"] {
+      padding: 6px;
+      background: var(--surface-muted);
+    }
+
+    input[type="file"]::file-selector-button {
+      margin-right: 10px;
+      border: 0;
+      border-radius: 8px;
+      padding: 7px 11px;
+      color: #fff;
+      background: var(--primary);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      background: var(--primary-dark);
+    }
+
+    input[type="file"]:focus,
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary), transparent 80%);
     }
 
     textarea {
-      min-height: 86px;
+      min-height: 92px;
       resize: vertical;
     }
 
     input[type="range"] {
-      accent-color: var(--accent);
+      accent-color: var(--primary);
     }
 
     .range-line {
@@ -168,81 +377,112 @@
       color: var(--muted);
     }
 
-    .checkbox-line {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      margin-top: 13px;
-    }
-
-    .checkbox-line input {
-      width: auto;
-    }
-
-    .checkbox-line label {
-      margin: 0;
-    }
-
     .button-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 10px;
       margin-top: 20px;
     }
 
     button {
-      border: 0;
-      border-radius: 11px;
-      padding: 11px 14px;
+      min-height: 42px;
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      padding: 9px 14px;
       cursor: pointer;
       font-weight: 700;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
     }
 
     button.primary {
-      background: var(--accent);
-      color: white;
+      background: var(--primary);
+      color: #fff;
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
     }
 
     button.secondary {
-      background: transparent;
       color: var(--text);
-      border: 1px solid var(--border);
+      background: var(--surface);
+      border-color: var(--border);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: var(--surface-muted);
+    }
+
+    button:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--primary), transparent 70%);
+      outline-offset: 2px;
     }
 
     button:disabled {
       cursor: not-allowed;
-      opacity: 0.5;
+      opacity: .5;
+    }
+
+    .preview-card {
+      overflow: hidden;
+    }
+
+    .preview-status {
+      text-align: right;
     }
 
     .canvas-wrap {
-      flex: 0 1 auto;
-      min-height: min(420px, calc(100vh - 130px));
-      max-height: calc(100vh - 130px);
-      display: grid;
-      place-items: start center;
+      min-height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: auto;
-      border-radius: 13px;
-      border: 1px dashed var(--border);
-      background:
-        linear-gradient(45deg, rgba(127, 127, 127, 0.10) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(127, 127, 127, 0.10) 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, rgba(127, 127, 127, 0.10) 75%),
-        linear-gradient(-45deg, transparent 75%, rgba(127, 127, 127, 0.10) 75%);
+      margin: 0;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-muted);
+    }
+
+    .canvas-surface {
+      display: none;
+      flex: 0 0 auto;
+      max-width: 100%;
+      max-height: 72vh;
+      overflow: hidden;
+      line-height: 0;
+      border: 1px solid color-mix(in srgb, var(--border), var(--text) 12%);
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(24, 20, 55, .12);
+      background-color: var(--surface);
+      background-image:
+        linear-gradient(45deg, var(--surface-muted) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--surface-muted) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--surface-muted) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--surface-muted) 75%);
       background-size: 24px 24px;
       background-position: 0 0, 0 12px, 12px -12px, -12px 0;
     }
 
+    .canvas-surface.has-image {
+      display: inline-flex;
+    }
+
     canvas {
       display: block;
+      width: auto;
+      height: auto;
       max-width: 100%;
-      max-height: 76vh;
+      max-height: 72vh;
       object-fit: contain;
     }
 
     .status {
       min-height: 1.25em;
+      margin-top: 4px;
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: .9rem;
     }
 
     .status.error {
@@ -250,48 +490,103 @@
     }
 
     .metadata-preview {
-      margin-top: 10px;
-      padding: 10px;
-      max-height: 160px;
+      min-height: 260px;
+      max-height: 560px;
       overflow: auto;
+      margin: 0;
+      padding: 18px;
       white-space: pre-wrap;
-      word-break: break-word;
+      overflow-wrap: anywhere;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      font: 0.78rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      color: var(--muted);
+      border-radius: 12px;
+      background: #111018;
+      color: #e9e5ff;
+      font: .82rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
 
     .note {
-      margin-top: 14px;
-      font-size: 0.78rem;
+      margin-top: 12px;
+      font-size: .8rem;
     }
 
-    .page-footer {
-      width: min(1280px, calc(100% - 32px));
-      margin: -4px auto 24px;
-      text-align: center;
+    code {
+      padding: .08em .34em;
+      border-radius: 5px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: .94em;
+    }
+
+    .site-footer {
+      padding: 0 0 34px;
       color: var(--muted);
+      text-align: center;
     }
 
-    .page-footer a {
-      color: var(--accent);
+    .site-footer a {
+      color: var(--primary);
+      font-weight: 650;
+      text-underline-offset: 3px;
     }
-    
-    @media (max-width: 850px) {
-      .app {
+
+    @media (max-width: 900px) {
+      .card-grid {
         grid-template-columns: 1fr;
       }
 
-      .preview-panel {
-        position: static;
-        max-height: none;
-        min-height: 430px;
+      .card--full {
+        grid-column: auto;
       }
 
       .canvas-wrap {
-        min-height: 330px;
-        max-height: none;
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .site-header {
+        padding: 36px 0 32px;
+      }
+
+      .header-inner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .privacy-pill {
+        align-self: flex-start;
+      }
+
+      .app {
+        padding-top: 22px;
+      }
+
+      .drop-zone {
+        min-height: 270px;
+        padding: 42px 18px;
+      }
+
+      .card-section {
+        padding: 18px;
+      }
+
+      .card-heading {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .preview-status {
+        text-align: left;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .canvas-wrap {
+        min-height: 280px;
+        margin: 0;
       }
     }
   </style>
@@ -327,188 +622,272 @@
 </head>
 
 <body>
-  <main class="app">
-    <section class="panel controls">
-      <h1>AI Image Transparency Tool</h1>
-      <p>Everything runs locally in your browser. Images are never uploaded.</p>
-
-      <h2>1. Images</h2>
-      <div class="field">
-        <label for="sourceFile">Source image (PNG, JPEG or WebP)</label>
-        <input id="sourceFile" type="file" accept="image/png,image/jpeg,image/webp" />
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <p class="eyebrow">Browser-based AI transparency editor</p>
+        <h1>AI Image Transparency Tool</h1>
+        <p class="subtitle">Add a visible AI disclosure badge and transparency metadata without uploading the image.</p>
       </div>
-
-      <div class="field">
-        <label for="defaultBadge">Badge</label>
-        <select id="defaultBadge">
-          <option value="ai-generated-black-transparent" selected>AI Generated Black Transparent</option>
-          <option value="ai-generated-black">AI Generated Black</option>
-        </select>
+      <div class="privacy-pill" title="The selected image is processed by JavaScript in this browser.">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 2 4.5 5v5.6c0 5 3.2 9.6 7.5 11.4 4.3-1.8 7.5-6.4 7.5-11.4V5L12 2Zm0 2.2 5.4 2.1v4.3c0 3.9-2.2 7.6-5.4 9.2-3.2-1.6-5.4-5.3-5.4-9.2V6.3L12 4.2Zm-.9 4v3H8.3v2.1h2.8v3h2.1v-3H16v-2.1h-2.8v-3h-2.1Z" />
+        </svg>
+        Local processing
       </div>
-      <p class="note">Select one of the built-in AI disclosure badges.</p>
+    </div>
+  </header>
 
-      <h2>2. Badge</h2>
-      <div class="field-row">
+  <main class="container app">
+    <div class="card-grid">
+      <section class="card card-section source-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2>Select image</h2>
+            <p class="card-description">Choose the PNG, JPEG or WebP image you want to label.</p>
+          </div>
+        </div>
+        <div id="dropZone" class="drop-zone" tabindex="0" role="button"
+          aria-label="Choose a PNG, JPEG or WebP image, or drop one here">
+          <input id="sourceFile" type="file" hidden accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" />
+          <div class="drop-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M19 13v6H5v-6H3v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6h-2ZM13 5.8l2.6 2.6L17 7l-5-5-5 5 1.4 1.4L11 5.8V16h2V5.8Z" />
+            </svg>
+          </div>
+          <h2>Drop an image here</h2>
+          <p>or <span class="link-like">choose a file</span></p>
+          <small id="sourceFileName">PNG, JPEG and WebP · processed locally</small>
+        </div>
+      </section>
+
+      <section class="card card-section badge-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Step 2</p>
+            <h2>Disclosure badge</h2>
+            <p class="card-description">Select and position the visible AI-generated label.</p>
+          </div>
+        </div>
         <div class="field">
-          <label for="position">Position</label>
-          <select id="position">
-            <option value="top-left">Top / left</option>
-            <option value="top-right">Top / right</option>
-            <option value="bottom-left">Bottom / left</option>
-            <option value="bottom-right" selected>Bottom / right</option>
+          <label for="defaultBadge">Badge</label>
+          <select id="defaultBadge">
+            <option value="ai-generated-black-transparent" selected>AI Generated Black Transparent</option>
+            <option value="ai-generated-black">AI Generated Black</option>
+            <option value="ai-generated-white-transparent">AI Generated White Transparent</option>
+            <option value="ai-generated-white">AI Generated White</option>
+            <option value="ai-modified-black-transparent">AI Modified Black Transparent</option>
+            <option value="ai-modified-black">AI Modified Black</option>
+            <option value="ai-modified-white-transparent">AI Modified White Transparent</option>
+            <option value="ai-modified-white">AI Modified White</option>
+            <option value="ai-black-transparent">AI Black Transparent</option>
+            <option value="ai-black">AI Black</option>
+            <option value="ai-white-transparent">AI White Transparent</option>
+            <option value="ai-white">AI White</option>
           </select>
         </div>
-        <div class="field">
-          <label for="margin">Margin (px)</label>
-          <input id="margin" type="number" min="0" max="500" value="24" />
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="badgeSize">Badge width</label>
-        <div class="range-line">
-          <input id="badgeSize" type="range" min="5" max="60" value="20" />
-          <output id="badgeSizeValue">20%</output>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="opacity">Opacity</label>
-        <div class="range-line">
-          <input id="opacity" type="range" min="10" max="100" value="100" />
-          <output id="opacityValue">100%</output>
-        </div>
-      </div>
-
-      <h2>3. Metadata</h2>
-      <div class="field">
-        <label for="metadataMode">Metadata handling</label>
-        <select id="metadataMode">
-          <option value="update" selected>Update existing metadata</option>
-          <option value="replace">Replace metadata completely</option>
-        </select>
-      </div>
-      <p class="note"><strong>Update</strong> keeps supported unrelated source metadata and fills empty fields from
-        existing XMP. <strong>Replace</strong> discards source metadata and writes only the metadata generated by this
-        tool.</p>
-
-      <div class="field">
-        <label for="title">Title</label>
-        <input id="title" type="text" maxlength="250" placeholder="e.g. Person standing in front of a car" />
-      </div>
-      <div class="field">
-        <label for="description">Description</label>
-        <textarea id="description" maxlength="4000"
-          placeholder="AI-generated illustration of a person standing in front of a car."></textarea>
-      </div>
-      <div class="field">
-        <label for="digitalSourceType">Digital source type</label>
-        <input id="digitalSourceType" type="text" maxlength="500"
-          value="http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia" />
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="aiSystemUsed">AI system used</label>
-          <input id="aiSystemUsed" type="text" maxlength="250" placeholder="e.g. ChatGPT" />
+        <div class="field-row">
+          <div class="field">
+            <label for="position">Position</label>
+            <select id="position">
+              <option value="top-left">Top / left</option>
+              <option value="top-right">Top / right</option>
+              <option value="bottom-left">Bottom / left</option>
+              <option value="bottom-right" selected>Bottom / right</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="margin">Margin (px)</label>
+            <input id="margin" type="number" min="0" max="500" value="24" />
+          </div>
         </div>
         <div class="field">
-          <label for="aiSystemVersionUsed">AI system version</label>
-          <input id="aiSystemVersionUsed" type="text" maxlength="100" placeholder="Optional" />
+          <label for="badgeSize">Badge width</label>
+          <div class="range-line">
+            <input id="badgeSize" type="range" min="5" max="60" value="20" />
+            <output id="badgeSizeValue">20%</output>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label for="aiPromptInformation">AI prompt information</label>
-        <textarea id="aiPromptInformation" maxlength="8000"
-          placeholder="Describe the prompt or instructions used to generate the image."></textarea>
-      </div>
-      <div class="field">
-        <label for="aiPromptWriterName">AI prompt writer name</label>
-        <input id="aiPromptWriterName" type="text" maxlength="250" placeholder="Name of the human prompt author" />
-      </div>
-      <div class="field">
-        <label for="aiPromptWriterOrganisation">AI prompt writer organisation</label>
-        <input id="aiPromptWriterOrganisation" type="text" maxlength="500" placeholder="e.g. Company XY" />
-      </div>
-      <div class="field">
-        <label for="creditLine">Credit line</label>
-        <input id="creditLine" type="text" maxlength="500"
-          placeholder="e.g. AI-generated image produced by Company XY using ChatGPT" />
-      </div>
-      <div class="field">
-        <label for="disclosure">Disclosure</label>
-        <input id="disclosure" type="text" maxlength="250" value="AI-generated" />
-      </div>
-      <div class="field">
-        <label for="processingOperations">Processing operations (JSON array)</label>
-        <textarea id="processingOperations" spellcheck="false">[
+        <div class="field">
+          <label for="opacity">Opacity</label>
+          <div class="range-line">
+            <input id="opacity" type="range" min="10" max="100" value="100" />
+            <output id="opacityValue">100%</output>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-section preview-card card--full">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Live result</p>
+            <h2>Image preview</h2>
+          </div>
+          <div class="preview-status">
+            <p class="eyebrow">Status</p>
+            <div id="status" class="status">Choose a source image.</div>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <div id="canvasSurface" class="canvas-surface">
+            <canvas id="canvas" aria-label="Image preview"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-section metadata-card card--full">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Step 3</p>
+            <h2>Transparency metadata</h2>
+            <p class="card-description">Describe the AI system, prompt authorship, processing and credit information
+              embedded in the exported image.</p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="metadataMode">Metadata handling</label>
+          <select id="metadataMode">
+            <option value="update" selected>Update existing metadata</option>
+            <option value="replace">Replace metadata completely</option>
+          </select>
+        </div>
+        <p class="note"><strong>Update</strong> keeps supported unrelated source metadata and fills empty fields from
+          existing XMP. <strong>Replace</strong> discards source metadata and writes only the metadata generated by this
+          tool.</p>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="title">Title</label>
+            <input id="title" type="text" maxlength="250" placeholder="e.g. Person standing in front of a car" />
+          </div>
+          <div class="field">
+            <label for="creator">Creator</label>
+            <input id="creator" type="text" maxlength="1000" placeholder="e.g. Jane Doe; Company XY" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" maxlength="4000"
+            placeholder="e.g. AI-generated illustration of a person standing in front of a car."></textarea>
+        </div>
+        <div class="field">
+          <label for="altTextAccessibility">Alt text (accessibility)</label>
+          <textarea id="altTextAccessibility" maxlength="250"
+            placeholder="Briefly describe the image for assistive technology."></textarea>
+        </div>
+        <p class="note">Stored as <code>Iptc4xmpCore:AltTextAccessibility</code>. Keep it concise and focused on the
+          image’s purpose and meaningful visual content.</p>
+        <div class="field">
+          <label for="digitalSourceType">Digital source type</label>
+          <input id="digitalSourceType" type="text" maxlength="500"
+            value="http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="aiSystemUsed">AI system used</label>
+            <input id="aiSystemUsed" type="text" maxlength="250" placeholder="e.g. ChatGPT" />
+          </div>
+          <div class="field">
+            <label for="aiSystemVersionUsed">AI system version</label>
+            <input id="aiSystemVersionUsed" type="text" maxlength="100" placeholder="Optional" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="aiPromptInformation">AI prompt information</label>
+          <textarea id="aiPromptInformation" maxlength="8000"
+            placeholder="Describe the prompt or instructions used to generate the image."></textarea>
+        </div>
+        <div class="field">
+          <label for="aiPromptWriterName">AI prompt writer name</label>
+          <input id="aiPromptWriterName" type="text" maxlength="250" placeholder="Name of the human prompt author" />
+        </div>
+        <div class="field">
+          <label for="creditLine">Credit line</label>
+          <input id="creditLine" type="text" maxlength="500"
+            placeholder="e.g. AI-generated image produced by Company XY using ChatGPT" />
+        </div>
+        <div class="field">
+          <label for="processingOperations">Processing operations (JSON array)</label>
+          <textarea id="processingOperations" spellcheck="false">[
   {
     "type": "humanNonGenerativeEdit",
     "description": "Added a visible AI disclosure badge."
   }
 ]</textarea>
-      </div>
-      <p class="note">Add earlier processing steps here, for example <code>humanComposite</code> when a screenshot,
-        photo, logo or other non-AI element was inserted into an AI-generated base image. Each item requires a non-empty
-        <code>type</code> and <code>description</code>.</p>
-      <div class="field">
-        <label for="customMetadata">Custom metadata (JSON object)</label>
-        <textarea id="customMetadata" spellcheck="false"
-          placeholder='{"projectId":"example","reviewed":true}'></textarea>
-      </div>
-      <p class="note">The preview includes the logical metadata object, the exact XMP field mapping and a security note.
-        IPTC/DC/Photoshop fields are embedded as XMP; processing, disclosure and custom values remain in the tool's XMP
-        namespace.</p>
-      <div id="metadataPreview" class="metadata-preview">{}</div>
-
-      <h2>4. Export</h2>
-      <div class="field-row">
-        <div class="field">
-          <label for="format">Format</label>
-          <select id="format">
-            <option value="image/png">PNG</option>
-            <option value="image/jpeg">JPEG</option>
-            <option value="image/webp">WebP</option>
-          </select>
         </div>
-        <div class="field quality-field">
-          <label for="quality">JPEG/WebP quality</label>
-          <div class="range-line">
-            <input id="quality" type="range" min="40" max="100" value="92" />
-            <output id="qualityValue">92%</output>
+        <p class="note">Add earlier processing steps here, for example <code>humanComposite</code> when a screenshot,
+          photo, logo or other non-AI element was inserted into an AI-generated base image. Each item requires a
+          non-empty <code>type</code> and <code>description</code>.</p>
+      </section>
+
+      <section class="card card-section metadata-output-card card--full">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Generated data</p>
+            <h2>Metadata preview</h2>
+            <p class="card-description">Logical metadata, exact XMP mappings and export details are shown here.</p>
           </div>
         </div>
-      </div>
+        <div id="metadataPreview" class="metadata-preview">{}</div>
+        <p class="note">AI provenance uses IPTC Extension properties; titles, descriptions and creators use Dublin
+          Core; accessibility text uses IPTC Core; credit uses the Photoshop namespace; and processing history uses XMP
+          Media Management. All generated XMP properties use standard namespaces.</p>
+      </section>
 
-      <div class="button-row" style="grid-template-columns: 1fr;">
-        <button id="downloadButton" class="primary" type="button" disabled>Download image</button>
-      </div>
-      <p class="note">The image pixels are re-encoded. In update mode, supported PNG text/EXIF metadata, JPEG
-        EXIF/comments, or WebP EXIF metadata are copied and existing XMP is merged. EXIF orientation is normalized and
-        stale embedded EXIF thumbnails are removed. Color profiles and some format-specific metadata cannot always be
-        carried across format conversion.</p>
-    </section>
-
-    <section class="panel preview-panel">
-      <div>
-        <strong>Preview</strong>
-        <div id="status" class="status">Choose a source image.</div>
-      </div>
-      <div class="canvas-wrap">
-        <canvas id="canvas" aria-label="Image preview"></canvas>
-      </div>
-    </section>
+      <section class="card card-section export-card card--full">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Step 4</p>
+            <h2>Export image</h2>
+            <p class="card-description">Choose the output format and download the re-encoded image with its transparency
+              metadata.</p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="format">Format</label>
+            <select id="format">
+              <option value="image/png">PNG</option>
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <div class="field quality-field">
+            <label for="quality">JPEG/WebP quality</label>
+            <div class="range-line">
+              <input id="quality" type="range" min="40" max="100" value="92" />
+              <output id="qualityValue">92%</output>
+            </div>
+          </div>
+        </div>
+        <div class="button-row">
+          <button id="downloadButton" class="primary" type="button" disabled>Download image</button>
+        </div>
+        <p class="note">The image pixels are re-encoded. In update mode, supported PNG text/EXIF metadata, JPEG
+          EXIF/comments, or WebP EXIF metadata are copied and existing XMP is merged. EXIF orientation is normalized and
+          stale embedded EXIF thumbnails are removed. Color profiles and some format-specific metadata cannot always be
+          carried across format conversion.</p>
+      </section>
+    </div>
   </main>
 
-  <footer class="page-footer">
-    <small>Made with ❤️ in Berlin. Source code on <a
-        href="https://github.com/openpotato/ai-image-transparency-tool">GitHub</a>.</small>
+  <footer class="site-footer">
+    <div class="container">
+      <small>Made with ❤️ in Berlin. Source code on <a
+          href="https://github.com/openpotato/ai-image-transparency-tool">GitHub</a>.</small>
+    </div>
   </footer>
 
   <script>
     "use strict";
 
     const els = {
+      dropZone: document.querySelector("#dropZone"),
       sourceFile: document.querySelector("#sourceFile"),
+      sourceFileName: document.querySelector("#sourceFileName"),
       defaultBadge: document.querySelector("#defaultBadge"),
       position: document.querySelector("#position"),
       margin: document.querySelector("#margin"),
@@ -521,13 +900,12 @@
       aiSystemVersionUsed: document.querySelector("#aiSystemVersionUsed"),
       aiPromptInformation: document.querySelector("#aiPromptInformation"),
       aiPromptWriterName: document.querySelector("#aiPromptWriterName"),
-      aiPromptWriterOrganisation: document.querySelector("#aiPromptWriterOrganisation"),
+      creator: document.querySelector("#creator"),
       title: document.querySelector("#title"),
       description: document.querySelector("#description"),
+      altTextAccessibility: document.querySelector("#altTextAccessibility"),
       creditLine: document.querySelector("#creditLine"),
-      disclosure: document.querySelector("#disclosure"),
       processingOperations: document.querySelector("#processingOperations"),
-      customMetadata: document.querySelector("#customMetadata"),
       metadataMode: document.querySelector("#metadataMode"),
       metadataPreview: document.querySelector("#metadataPreview"),
       format: document.querySelector("#format"),
@@ -535,6 +913,7 @@
       qualityValue: document.querySelector("#qualityValue"),
       downloadButton: document.querySelector("#downloadButton"),
       status: document.querySelector("#status"),
+      canvasSurface: document.querySelector("#canvasSurface"),
       canvas: document.querySelector("#canvas")
     };
 
@@ -551,6 +930,9 @@
     let sourceMetadata = emptySourceMetadata();
     let renderQueued = false;
     let lastExportReport = null;
+    let activeMetadataMode = els.metadataMode.value;
+    let metadataFormStates = { update: null, replace: null };
+    const initialMetadataFormState = captureMetadataFormState();
 
     const SECURITY_NOTE = "The metadata written by this tool is unsigned XMP metadata and does not provide tamper detection. No C2PA manifest, digital signature, or trusted timestamp was added by this tool.";
 
@@ -614,6 +996,269 @@
             <path class="cls-2" d="M1225.64,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-72.1h-24.48c-.9,0-1.66-.31-2.29-.94-.63-.63-.94-1.39-.94-2.29v-12.11c0-.99.31-1.79.94-2.42.63-.63,1.39-.94,2.29-.94h70.49c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v12.11c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-24.35v72.1c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-14.93Z"/>
             <path class="cls-2" d="M1298.32,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h60.94c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.8-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
             <path class="cls-2" d="M1393.48,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42.63-.63,1.43-.94,2.42-.94h33.77c8.97,0,16.46,1.41,22.46,4.24,6.01,2.83,10.6,6.95,13.79,12.38,3.18,5.43,4.86,12.13,5.04,20.11.09,3.95.13,7.4.13,10.36s-.05,6.37-.13,10.22c-.27,8.34-1.93,15.25-4.98,20.72-3.05,5.47-7.53,9.53-13.45,12.17-5.92,2.65-13.32,3.97-22.2,3.97h-34.44ZM1411.51,307.17h15.74c4.48,0,8.16-.67,11.03-2.02,2.87-1.35,5-3.47,6.39-6.39,1.39-2.91,2.13-6.7,2.22-11.37.09-2.6.16-4.93.2-7,.04-2.06.04-4.12,0-6.19-.05-2.06-.11-4.35-.2-6.86-.18-6.73-1.91-11.68-5.18-14.86-3.27-3.18-8.32-4.78-15.13-4.78h-15.07v59.46Z"/>
+          </g>
+        </svg>`,
+      "ai-generated-white-transparent": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1789.84 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill: #1d1d1b;
+              }
+
+              .cls-2 {
+                fill: #fff;
+                fill-rule: evenodd;
+                opacity: .5;
+              }
+            </style>
+          </defs>
+          <path class="cls-2" d="M352.84,410.77h1093.16c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H352.84c-85.55,0-145.54,59.94-145.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-1" d="M326.09,341c-.98,0-1.87-.4-2.66-1.19-.8-.79-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.79-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38-.92-.92-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.74-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM369.27,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-1" d="M469.58,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+          <g>
+            <path class="cls-1" d="M639.25,325.87c-8.43,0-15.63-1.41-21.59-4.24-5.97-2.83-10.58-6.95-13.86-12.38-3.27-5.42-5.04-11.99-5.31-19.71-.09-3.86-.13-7.98-.13-12.38s.04-8.56.13-12.51c.27-7.53,2.04-13.94,5.31-19.24,3.27-5.29,7.94-9.35,13.99-12.17,6.05-2.83,13.2-4.24,21.46-4.24,6.64,0,12.46.85,17.49,2.56,5.02,1.7,9.24,3.92,12.65,6.66,3.41,2.74,6.01,5.72,7.8,8.95,1.79,3.23,2.74,6.32,2.83,9.28,0,.81-.27,1.5-.81,2.08-.54.58-1.26.87-2.15.87h-16.68c-.9,0-1.59-.18-2.08-.54-.49-.36-.92-.9-1.28-1.61-.63-1.61-1.64-3.25-3.03-4.91-1.39-1.66-3.25-3.07-5.58-4.24-2.33-1.16-5.38-1.75-9.15-1.75-5.65,0-10.11,1.48-13.39,4.44-3.27,2.96-5.04,7.8-5.31,14.53-.27,7.71-.27,15.56,0,23.54.27,7,2.08,12.02,5.45,15.07,3.36,3.05,7.87,4.57,13.52,4.57,3.68,0,6.97-.65,9.89-1.95,2.91-1.3,5.22-3.34,6.93-6.12,1.7-2.78,2.56-6.32,2.56-10.63v-3.36h-14.66c-.9,0-1.66-.34-2.29-1.01-.63-.67-.94-1.46-.94-2.35v-8.61c0-.99.31-1.79.94-2.42.63-.63,1.39-.94,2.29-.94h32.96c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v14.66c0,7.71-1.68,14.31-5.04,19.78-3.36,5.47-8.16,9.66-14.39,12.58-6.23,2.92-13.52,4.37-21.86,4.37Z"/>
+            <path class="cls-1" d="M710.73,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-1" d="M805.88,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h12.24c1.34,0,2.33.32,2.96.94.63.63,1.03,1.12,1.21,1.48l35.92,56.1v-55.15c0-.99.31-1.79.94-2.42s1.39-.94,2.29-.94h13.72c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v87.44c0,.9-.32,1.68-.94,2.35-.63.67-1.44,1.01-2.42,1.01h-12.38c-1.35,0-2.31-.34-2.89-1.01-.58-.67-1.01-1.14-1.28-1.41l-35.78-54.35v53.41c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-13.59Z"/>
+            <path class="cls-1" d="M912.19,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-1" d="M1007.35,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h35.65c11.21,0,20.04,2.58,26.5,7.74,6.46,5.16,9.69,12.58,9.69,22.26,0,6.55-1.57,12.02-4.71,16.41-3.14,4.4-7.35,7.67-12.65,9.82l18.97,33.63c.27.54.4,1.03.4,1.48,0,.72-.27,1.37-.81,1.95-.54.58-1.21.88-2.02.88h-14.93c-1.61,0-2.82-.42-3.63-1.28-.81-.85-1.39-1.63-1.75-2.35l-16.41-30.8h-16.28v31.07c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-14.66ZM1025.38,273h17.22c4.93,0,8.59-1.12,10.96-3.36,2.38-2.24,3.56-5.38,3.56-9.42s-1.17-7.22-3.5-9.55c-2.33-2.33-6.01-3.5-11.03-3.5h-17.22v25.83Z"/>
+            <path class="cls-1" d="M1100.62,324.52c-.81,0-1.48-.29-2.02-.88-.54-.58-.81-1.23-.81-1.95,0-.45.04-.85.13-1.21l32.02-86.5c.27-.99.81-1.84,1.61-2.56.81-.72,1.93-1.08,3.36-1.08h17.22c1.43,0,2.56.36,3.36,1.08.81.72,1.35,1.57,1.61,2.56l32.02,86.5c.09.36.13.76.13,1.21,0,.72-.27,1.37-.81,1.95-.54.58-1.21.88-2.02.88h-13.99c-1.35,0-2.33-.31-2.96-.94-.63-.63-1.03-1.21-1.21-1.75l-5.78-15.07h-37.94l-5.78,15.07c-.18.54-.58,1.12-1.21,1.75-.63.63-1.61.94-2.96.94h-13.99ZM1129.54,289.41h27.85l-13.86-38.74-13.99,38.74Z"/>
+            <path class="cls-1" d="M1225.64,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-72.1h-24.48c-.9,0-1.66-.31-2.29-.94-.63-.63-.94-1.39-.94-2.29v-12.11c0-.99.31-1.79.94-2.42s1.39-.94,2.29-.94h70.49c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v12.11c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-24.35v72.1c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-14.93Z"/>
+            <path class="cls-1" d="M1298.32,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-1" d="M1393.48,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h33.77c8.97,0,16.46,1.41,22.46,4.24,6.01,2.83,10.6,6.95,13.79,12.38,3.18,5.43,4.86,12.13,5.04,20.11.09,3.95.13,7.4.13,10.36s-.05,6.37-.13,10.22c-.27,8.34-1.93,15.25-4.98,20.72-3.05,5.47-7.53,9.53-13.45,12.17-5.92,2.65-13.32,3.97-22.2,3.97h-34.44ZM1411.51,307.17h15.74c4.48,0,8.16-.67,11.03-2.02,2.87-1.35,5-3.47,6.39-6.39,1.39-2.91,2.13-6.7,2.22-11.37.09-2.6.16-4.93.2-7,.04-2.06.04-4.12,0-6.19-.05-2.06-.11-4.35-.2-6.86-.18-6.73-1.91-11.68-5.18-14.87-3.27-3.18-8.32-4.78-15.13-4.78h-15.07v59.46Z"/>
+          </g>
+        </svg>`,
+      "ai-generated-white": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1789.84 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill: #fff;
+                fill-rule: evenodd;
+              }
+
+              .cls-2 {
+                fill: #1d1d1b;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M352.84,410.77h1093.16c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H352.84c-85.55,0-145.54,59.94-145.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-2" d="M326.09,341c-.98,0-1.87-.4-2.66-1.19-.8-.79-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.79-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38-.92-.92-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.74-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM369.27,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-2" d="M469.58,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+          <g>
+            <path class="cls-2" d="M639.25,325.87c-8.43,0-15.63-1.41-21.59-4.24-5.97-2.83-10.58-6.95-13.86-12.38-3.27-5.42-5.04-11.99-5.31-19.71-.09-3.86-.13-7.98-.13-12.38s.04-8.56.13-12.51c.27-7.53,2.04-13.94,5.31-19.24,3.27-5.29,7.94-9.35,13.99-12.17,6.05-2.83,13.2-4.24,21.46-4.24,6.64,0,12.46.85,17.49,2.56,5.02,1.7,9.24,3.92,12.65,6.66,3.41,2.74,6.01,5.72,7.8,8.95,1.79,3.23,2.74,6.32,2.83,9.28,0,.81-.27,1.5-.81,2.08-.54.58-1.26.87-2.15.87h-16.68c-.9,0-1.59-.18-2.08-.54-.49-.36-.92-.9-1.28-1.61-.63-1.61-1.64-3.25-3.03-4.91-1.39-1.66-3.25-3.07-5.58-4.24-2.33-1.16-5.38-1.75-9.15-1.75-5.65,0-10.11,1.48-13.39,4.44-3.27,2.96-5.04,7.8-5.31,14.53-.27,7.71-.27,15.56,0,23.54.27,7,2.08,12.02,5.45,15.07,3.36,3.05,7.87,4.57,13.52,4.57,3.68,0,6.97-.65,9.89-1.95,2.91-1.3,5.22-3.34,6.93-6.12,1.7-2.78,2.56-6.32,2.56-10.63v-3.36h-14.66c-.9,0-1.66-.34-2.29-1.01-.63-.67-.94-1.46-.94-2.35v-8.61c0-.99.31-1.79.94-2.42.63-.63,1.39-.94,2.29-.94h32.96c.99,0,1.79.31,2.42.94.63.63.94,1.44.94,2.42v14.66c0,7.71-1.68,14.31-5.04,19.78-3.36,5.47-8.16,9.66-14.39,12.58-6.23,2.92-13.52,4.37-21.86,4.37Z"/>
+            <path class="cls-2" d="M710.73,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M805.88,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h12.24c1.34,0,2.33.32,2.96.94.63.63,1.03,1.12,1.21,1.48l35.92,56.1v-55.15c0-.99.31-1.79.94-2.42s1.39-.94,2.29-.94h13.72c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v87.44c0,.9-.32,1.68-.94,2.35-.63.67-1.44,1.01-2.42,1.01h-12.38c-1.35,0-2.31-.34-2.89-1.01-.58-.67-1.01-1.14-1.28-1.41l-35.78-54.35v53.41c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-13.59Z"/>
+            <path class="cls-2" d="M912.19,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M1007.35,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h35.65c11.21,0,20.04,2.58,26.5,7.74,6.46,5.16,9.69,12.58,9.69,22.26,0,6.55-1.57,12.02-4.71,16.41-3.14,4.4-7.35,7.67-12.65,9.82l18.97,33.63c.27.54.4,1.03.4,1.48,0,.72-.27,1.37-.81,1.95-.54.58-1.21.88-2.02.88h-14.93c-1.61,0-2.82-.42-3.63-1.28-.81-.85-1.39-1.63-1.75-2.35l-16.41-30.8h-16.28v31.07c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-14.66ZM1025.38,273h17.22c4.93,0,8.59-1.12,10.96-3.36,2.38-2.24,3.56-5.38,3.56-9.42s-1.17-7.22-3.5-9.55c-2.33-2.33-6.01-3.5-11.03-3.5h-17.22v25.83Z"/>
+            <path class="cls-2" d="M1100.62,324.52c-.81,0-1.48-.29-2.02-.88-.54-.58-.81-1.23-.81-1.95,0-.45.04-.85.13-1.21l32.02-86.5c.27-.99.81-1.84,1.61-2.56.81-.72,1.93-1.08,3.36-1.08h17.22c1.43,0,2.56.36,3.36,1.08.81.72,1.35,1.57,1.61,2.56l32.02,86.5c.09.36.13.76.13,1.21,0,.72-.27,1.37-.81,1.95-.54.58-1.21.88-2.02.88h-13.99c-1.35,0-2.33-.31-2.96-.94-.63-.63-1.03-1.21-1.21-1.75l-5.78-15.07h-37.94l-5.78,15.07c-.18.54-.58,1.12-1.21,1.75-.63.63-1.61.94-2.96.94h-13.99ZM1129.54,289.41h27.85l-13.86-38.74-13.99,38.74Z"/>
+            <path class="cls-2" d="M1225.64,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-72.1h-24.48c-.9,0-1.66-.31-2.29-.94-.63-.63-.94-1.39-.94-2.29v-12.11c0-.99.31-1.79.94-2.42s1.39-.94,2.29-.94h70.49c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v12.11c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-24.35v72.1c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-14.93Z"/>
+            <path class="cls-2" d="M1298.32,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h60.94c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.76c0,.9-.32,1.66-.94,2.29-.63.63-1.44.94-2.42.94h-43.59v21.12h40.63c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v9.95c0,.9-.32,1.66-.94,2.29s-1.44.94-2.42.94h-40.63v21.79h44.66c.99,0,1.79.32,2.42.94.63.63.94,1.44.94,2.42v10.63c0,.99-.32,1.79-.94,2.42s-1.44.94-2.42.94h-62.02Z"/>
+            <path class="cls-2" d="M1393.48,324.52c-.99,0-1.79-.31-2.42-.94-.63-.63-.94-1.43-.94-2.42v-87.44c0-.99.31-1.79.94-2.42s1.43-.94,2.42-.94h33.77c8.97,0,16.46,1.41,22.46,4.24,6.01,2.83,10.6,6.95,13.79,12.38,3.18,5.43,4.86,12.13,5.04,20.11.09,3.95.13,7.4.13,10.36s-.05,6.37-.13,10.22c-.27,8.34-1.93,15.25-4.98,20.72-3.05,5.47-7.53,9.53-13.45,12.17-5.92,2.65-13.32,3.97-22.2,3.97h-34.44ZM1411.51,307.17h15.74c4.48,0,8.16-.67,11.03-2.02,2.87-1.35,5-3.47,6.39-6.39,1.39-2.91,2.13-6.7,2.22-11.37.09-2.6.16-4.93.2-7,.04-2.06.04-4.12,0-6.19-.05-2.06-.11-4.35-.2-6.86-.18-6.73-1.91-11.68-5.18-14.87-3.27-3.18-8.32-4.78-15.13-4.78h-15.07v59.46Z"/>
+          </g>
+        </svg>`,
+      "ai-modified-black-transparent": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700.79 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill-rule: evenodd;
+                opacity: .5;
+              }
+
+              .cls-2 {
+                fill: #fff;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M376.65,410.77h939.48c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H381.65c-85.55,0-150.54,59.94-150.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-2" d="M626.46,325.63c-.92,0-1.72-.32-2.4-.96-.69-.64-1.03-1.46-1.03-2.47v-89.25c0-1.01.34-1.83,1.03-2.47.69-.64,1.49-.96,2.4-.96h12.77c1.37,0,2.4.37,3.09,1.1.69.73,1.17,1.28,1.44,1.65l25.27,46.55,25.54-46.55c.18-.37.62-.91,1.3-1.65.69-.73,1.72-1.1,3.09-1.1h12.77c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-14.01c-.92,0-1.69-.32-2.33-.96-.64-.64-.96-1.46-.96-2.47v-55.47l-17.44,32.68c-.46.82-1.05,1.56-1.79,2.2-.73.64-1.69.96-2.88.96h-6.45c-1.19,0-2.15-.32-2.88-.96-.73-.64-1.33-1.37-1.79-2.2l-17.44-32.68v55.47c0,1.01-.32,1.83-.96,2.47-.64.64-1.42.96-2.33.96h-14.01Z"/>
+            <path class="cls-2" d="M784.28,327c-8.33,0-15.52-1.37-21.56-4.12-6.04-2.75-10.76-6.89-14.14-12.43-3.39-5.54-5.22-12.52-5.49-20.94-.09-3.93-.14-7.85-.14-11.74s.04-7.85.14-11.88c.27-8.24,2.13-15.17,5.56-20.8,3.43-5.63,8.19-9.86,14.28-12.7,6.09-2.84,13.2-4.26,21.35-4.26s15.13,1.42,21.21,4.26c6.09,2.84,10.87,7.07,14.35,12.7,3.48,5.63,5.31,12.56,5.49,20.8.18,4.03.28,7.99.28,11.88s-.09,7.81-.28,11.74c-.27,8.42-2.11,15.4-5.49,20.94-3.39,5.54-8.1,9.68-14.14,12.43-6.04,2.75-13.18,4.12-21.42,4.12ZM784.28,309.29c5.31,0,9.68-1.62,13.11-4.88,3.43-3.25,5.24-8.44,5.42-15.58.18-4.03.27-7.8.27-11.33s-.09-7.25-.27-11.19c-.09-4.76-.96-8.65-2.61-11.67-1.65-3.02-3.82-5.24-6.52-6.66-2.7-1.42-5.84-2.13-9.41-2.13s-6.73.71-9.47,2.13c-2.75,1.42-4.92,3.64-6.52,6.66-1.6,3.02-2.5,6.91-2.68,11.67-.09,3.94-.14,7.67-.14,11.19s.04,7.3.14,11.33c.27,7.14,2.1,12.34,5.49,15.58,3.39,3.25,7.78,4.88,13.18,4.88Z"/>
+            <path class="cls-2" d="M856.69,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.09,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM875.09,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.11.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.88-15.45-4.88h-15.38v60.69Z"/>
+            <path class="cls-2" d="M964.67,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-2" d="M1018,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h61.24c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v11.67c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-43.25v23.21h40.51c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v11.67c0,.92-.32,1.7-.96,2.33s-1.46.96-2.47.96h-40.51v32.54c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-14.56Z"/>
+            <path class="cls-2" d="M1112.25,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-2" d="M1165.57,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h62.2c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v10.99c0,.92-.32,1.69-.96,2.33s-1.47.96-2.47.96h-44.49v21.56h41.47c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.16c0,.92-.32,1.7-.96,2.33-.64.64-1.47.96-2.47.96h-41.47v22.25h45.59c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.85c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-63.3Z"/>
+            <path class="cls-2" d="M1262.7,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.09,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM1281.1,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.11.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.88-15.45-4.88h-15.38v60.69Z"/>
+          </g>
+          <g>
+            <path class="cls-2" d="M349.9,341c-.98,0-1.87-.4-2.66-1.19-.8-.79-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.78-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38-.92-.92-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.74-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM393.08,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-2" d="M493.39,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+        </svg>`,
+      "ai-modified-black": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700.79 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill-rule: evenodd;
+              }
+
+              .cls-2 {
+                fill: #fff;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M376.65,410.77h939.48c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H381.65c-85.55,0-150.54,59.94-150.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-2" d="M626.46,325.63c-.92,0-1.72-.32-2.4-.96-.69-.64-1.03-1.46-1.03-2.47v-89.25c0-1.01.34-1.83,1.03-2.47.69-.64,1.49-.96,2.4-.96h12.77c1.37,0,2.4.37,3.09,1.1.69.73,1.17,1.28,1.44,1.65l25.27,46.55,25.54-46.55c.18-.36.62-.91,1.3-1.65.69-.73,1.72-1.1,3.09-1.1h12.77c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47s-1.47.96-2.47.96h-14.01c-.92,0-1.69-.32-2.33-.96-.64-.64-.96-1.46-.96-2.47v-55.48l-17.44,32.68c-.46.82-1.05,1.56-1.79,2.2-.73.64-1.69.96-2.88.96h-6.45c-1.19,0-2.15-.32-2.88-.96-.73-.64-1.33-1.37-1.79-2.2l-17.44-32.68v55.48c0,1.01-.32,1.83-.96,2.47-.64.64-1.42.96-2.33.96h-14.01Z"/>
+            <path class="cls-2" d="M784.28,327c-8.33,0-15.52-1.37-21.56-4.12-6.04-2.75-10.76-6.89-14.14-12.43-3.39-5.54-5.22-12.52-5.49-20.94-.09-3.94-.14-7.85-.14-11.74s.04-7.85.14-11.88c.27-8.24,2.13-15.17,5.56-20.8,3.43-5.63,8.19-9.86,14.28-12.7,6.09-2.84,13.2-4.26,21.35-4.26s15.13,1.42,21.21,4.26c6.09,2.84,10.87,7.07,14.35,12.7,3.48,5.63,5.31,12.56,5.49,20.8.18,4.03.28,7.99.28,11.88s-.09,7.81-.28,11.74c-.27,8.42-2.11,15.4-5.49,20.94-3.39,5.54-8.1,9.68-14.14,12.43-6.04,2.75-13.18,4.12-21.42,4.12ZM784.28,309.29c5.31,0,9.68-1.62,13.11-4.88,3.43-3.25,5.24-8.44,5.42-15.58.18-4.03.27-7.8.27-11.33s-.09-7.25-.27-11.19c-.09-4.76-.96-8.65-2.61-11.67-1.65-3.02-3.82-5.24-6.52-6.66-2.7-1.42-5.84-2.13-9.41-2.13s-6.73.71-9.47,2.13c-2.75,1.42-4.92,3.64-6.52,6.66-1.6,3.02-2.5,6.91-2.68,11.67-.09,3.94-.14,7.67-.14,11.19s.04,7.3.14,11.33c.27,7.14,2.1,12.34,5.49,15.58,3.39,3.25,7.78,4.88,13.18,4.88Z"/>
+            <path class="cls-2" d="M856.69,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.1,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM875.09,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.1.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.87-15.45-4.87h-15.38v60.69Z"/>
+            <path class="cls-2" d="M964.67,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-2" d="M1018,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h61.24c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v11.67c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-43.25v23.21h40.51c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v11.67c0,.92-.32,1.69-.96,2.33-.64.64-1.46.96-2.47.96h-40.51v32.54c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-14.56Z"/>
+            <path class="cls-2" d="M1112.25,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-2" d="M1165.57,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h62.2c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.99c0,.92-.32,1.69-.96,2.33-.64.64-1.47.96-2.47.96h-44.49v21.56h41.47c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.16c0,.92-.32,1.7-.96,2.33-.64.64-1.47.96-2.47.96h-41.47v22.25h45.59c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.85c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-63.3Z"/>
+            <path class="cls-2" d="M1262.7,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.1,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM1281.1,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.1.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.87-15.45-4.87h-15.38v60.69Z"/>
+          </g>
+          <g>
+            <path class="cls-2" d="M349.9,341c-.98,0-1.87-.4-2.66-1.19-.8-.8-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.78-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38s-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.73-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM393.08,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-2" d="M493.39,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+        </svg>`,
+      "ai-modified-white-transparent": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700.79 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill: #1d1d1b;
+              }
+
+              .cls-2 {
+                fill: #fff;
+                fill-rule: evenodd;
+                opacity: .5;
+              }
+            </style>
+          </defs>
+          <path class="cls-2" d="M376.65,410.77h939.48c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H381.65c-85.55,0-150.54,59.94-150.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-1" d="M626.46,325.63c-.92,0-1.72-.32-2.4-.96-.69-.64-1.03-1.46-1.03-2.47v-89.25c0-1.01.34-1.83,1.03-2.47.69-.64,1.49-.96,2.4-.96h12.77c1.37,0,2.4.37,3.09,1.1.69.73,1.17,1.28,1.44,1.65l25.27,46.55,25.54-46.55c.18-.37.62-.91,1.3-1.65.69-.73,1.72-1.1,3.09-1.1h12.77c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-14.01c-.92,0-1.69-.32-2.33-.96-.64-.64-.96-1.46-.96-2.47v-55.47l-17.44,32.68c-.46.82-1.05,1.56-1.79,2.2-.73.64-1.69.96-2.88.96h-6.45c-1.19,0-2.15-.32-2.88-.96-.73-.64-1.33-1.37-1.79-2.2l-17.44-32.68v55.47c0,1.01-.32,1.83-.96,2.47-.64.64-1.42.96-2.33.96h-14.01Z"/>
+            <path class="cls-1" d="M784.28,327c-8.33,0-15.52-1.37-21.56-4.12-6.04-2.75-10.76-6.89-14.14-12.43-3.39-5.54-5.22-12.52-5.49-20.94-.09-3.93-.14-7.85-.14-11.74s.04-7.85.14-11.88c.27-8.24,2.13-15.17,5.56-20.8,3.43-5.63,8.19-9.86,14.28-12.7,6.09-2.84,13.2-4.26,21.35-4.26s15.13,1.42,21.21,4.26c6.09,2.84,10.87,7.07,14.35,12.7,3.48,5.63,5.31,12.56,5.49,20.8.18,4.03.28,7.99.28,11.88s-.09,7.81-.28,11.74c-.27,8.42-2.11,15.4-5.49,20.94-3.39,5.54-8.1,9.68-14.14,12.43-6.04,2.75-13.18,4.12-21.42,4.12ZM784.28,309.29c5.31,0,9.68-1.62,13.11-4.88,3.43-3.25,5.24-8.44,5.42-15.58.18-4.03.27-7.8.27-11.33s-.09-7.25-.27-11.19c-.09-4.76-.96-8.65-2.61-11.67-1.65-3.02-3.82-5.24-6.52-6.66-2.7-1.42-5.84-2.13-9.41-2.13s-6.73.71-9.47,2.13c-2.75,1.42-4.92,3.64-6.52,6.66-1.6,3.02-2.5,6.91-2.68,11.67-.09,3.94-.14,7.67-.14,11.19s.04,7.3.14,11.33c.27,7.14,2.1,12.34,5.49,15.58,3.39,3.25,7.78,4.88,13.18,4.88Z"/>
+            <path class="cls-1" d="M856.69,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.09,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM875.09,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.11.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.88-15.45-4.88h-15.38v60.69Z"/>
+            <path class="cls-1" d="M964.67,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-1" d="M1018,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h61.24c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v11.67c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-43.25v23.21h40.51c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v11.67c0,.92-.32,1.7-.96,2.33s-1.46.96-2.47.96h-40.51v32.54c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-14.56Z"/>
+            <path class="cls-1" d="M1112.25,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-1" d="M1165.57,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h62.2c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v10.99c0,.92-.32,1.69-.96,2.33s-1.47.96-2.47.96h-44.49v21.56h41.47c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.16c0,.92-.32,1.7-.96,2.33-.64.64-1.47.96-2.47.96h-41.47v22.25h45.59c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.85c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-63.3Z"/>
+            <path class="cls-1" d="M1262.7,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.09,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM1281.1,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.11.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.88-15.45-4.88h-15.38v60.69Z"/>
+          </g>
+          <g>
+            <path class="cls-1" d="M349.9,341c-.98,0-1.87-.4-2.66-1.19-.8-.79-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.78-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38-.92-.92-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.74-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM393.08,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-1" d="M493.39,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+        </svg>`,
+      "ai-modified-white": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700.79 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill: #fff;
+                fill-rule: evenodd;
+              }
+
+              .cls-2 {
+                fill: #1d1d1b;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M376.65,410.77h939.48c85.55,0,145.54-59.94,145.54-133.2h0c0-73.27-59.99-133.21-145.54-133.21H381.65c-85.55,0-150.54,59.94-150.54,133.2h0c0,73.26,64.99,133.2,150.54,133.2"/>
+          <g>
+            <path class="cls-2" d="M626.46,325.63c-.92,0-1.72-.32-2.4-.96-.69-.64-1.03-1.46-1.03-2.47v-89.25c0-1.01.34-1.83,1.03-2.47.69-.64,1.49-.96,2.4-.96h12.77c1.37,0,2.4.37,3.09,1.1.69.73,1.17,1.28,1.44,1.65l25.27,46.55,25.54-46.55c.18-.37.62-.91,1.3-1.65.69-.73,1.72-1.1,3.09-1.1h12.77c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-14.01c-.92,0-1.69-.32-2.33-.96-.64-.64-.96-1.46-.96-2.47v-55.47l-17.44,32.68c-.46.82-1.05,1.56-1.79,2.2-.73.64-1.69.96-2.88.96h-6.45c-1.19,0-2.15-.32-2.88-.96-.73-.64-1.33-1.37-1.79-2.2l-17.44-32.68v55.47c0,1.01-.32,1.83-.96,2.47-.64.64-1.42.96-2.33.96h-14.01Z"/>
+            <path class="cls-2" d="M784.28,327c-8.33,0-15.52-1.37-21.56-4.12-6.04-2.75-10.76-6.89-14.14-12.43-3.39-5.54-5.22-12.52-5.49-20.94-.09-3.93-.14-7.85-.14-11.74s.04-7.85.14-11.88c.27-8.24,2.13-15.17,5.56-20.8,3.43-5.63,8.19-9.86,14.28-12.7,6.09-2.84,13.2-4.26,21.35-4.26s15.13,1.42,21.21,4.26c6.09,2.84,10.87,7.07,14.35,12.7,3.48,5.63,5.31,12.56,5.49,20.8.18,4.03.28,7.99.28,11.88s-.09,7.81-.28,11.74c-.27,8.42-2.11,15.4-5.49,20.94-3.39,5.54-8.1,9.68-14.14,12.43-6.04,2.75-13.18,4.12-21.42,4.12ZM784.28,309.29c5.31,0,9.68-1.62,13.11-4.88,3.43-3.25,5.24-8.44,5.42-15.58.18-4.03.27-7.8.27-11.33s-.09-7.25-.27-11.19c-.09-4.76-.96-8.65-2.61-11.67-1.65-3.02-3.82-5.24-6.52-6.66-2.7-1.42-5.84-2.13-9.41-2.13s-6.73.71-9.47,2.13c-2.75,1.42-4.92,3.64-6.52,6.66-1.6,3.02-2.5,6.91-2.68,11.67-.09,3.94-.14,7.67-.14,11.19s.04,7.3.14,11.33c.27,7.14,2.1,12.34,5.49,15.58,3.39,3.25,7.78,4.88,13.18,4.88Z"/>
+            <path class="cls-2" d="M856.69,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.09,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM875.09,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.11.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.88-15.45-4.88h-15.38v60.69Z"/>
+            <path class="cls-2" d="M964.67,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-2" d="M1018,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h61.24c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v11.67c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-43.25v23.21h40.51c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v11.67c0,.92-.32,1.7-.96,2.33s-1.46.96-2.47.96h-40.51v32.54c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-14.56Z"/>
+            <path class="cls-2" d="M1112.25,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h15.52c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v89.25c0,1.01-.32,1.83-.96,2.47-.64.64-1.46.96-2.47.96h-15.52Z"/>
+            <path class="cls-2" d="M1165.57,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h62.2c1.01,0,1.83.32,2.47.96.64.64.96,1.46.96,2.47v10.99c0,.92-.32,1.69-.96,2.33s-1.47.96-2.47.96h-44.49v21.56h41.47c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.16c0,.92-.32,1.7-.96,2.33-.64.64-1.47.96-2.47.96h-41.47v22.25h45.59c1.01,0,1.83.32,2.47.96.64.64.96,1.47.96,2.47v10.85c0,1.01-.32,1.83-.96,2.47-.64.64-1.47.96-2.47.96h-63.3Z"/>
+            <path class="cls-2" d="M1262.7,325.63c-1.01,0-1.83-.32-2.47-.96-.64-.64-.96-1.46-.96-2.47v-89.25c0-1.01.32-1.83.96-2.47.64-.64,1.46-.96,2.47-.96h34.47c9.15,0,16.8,1.44,22.93,4.33,6.13,2.88,10.82,7.09,14.07,12.63,3.25,5.54,4.96,12.38,5.15,20.53.09,4.03.14,7.55.14,10.57s-.05,6.5-.14,10.44c-.27,8.51-1.97,15.56-5.08,21.15-3.11,5.58-7.69,9.73-13.73,12.43-6.04,2.7-13.59,4.05-22.66,4.05h-35.15ZM1281.1,307.92h16.07c4.58,0,8.33-.69,11.26-2.06,2.93-1.37,5.1-3.55,6.52-6.52,1.42-2.97,2.17-6.84,2.27-11.6.09-2.65.16-5.03.21-7.14.04-2.11.04-4.21,0-6.32-.05-2.1-.12-4.44-.21-7-.18-6.87-1.95-11.92-5.29-15.17-3.34-3.25-8.49-4.88-15.45-4.88h-15.38v60.69Z"/>
+          </g>
+          <g>
+            <path class="cls-2" d="M349.9,341c-.98,0-1.87-.4-2.66-1.19-.8-.79-1.19-1.68-1.19-2.66,0-.61.06-1.16.18-1.65l43.18-117.96c.37-1.35,1.13-2.54,2.3-3.58,1.16-1.04,2.78-1.56,4.87-1.56h27.19c2.08,0,3.7.52,4.87,1.56,1.16,1.04,1.93,2.24,2.3,3.58l42.99,117.96c.24.49.37,1.04.37,1.65,0,.98-.4,1.87-1.19,2.66-.8.8-1.75,1.19-2.85,1.19h-22.6c-1.84,0-3.22-.46-4.13-1.38-.92-.92-1.5-1.75-1.75-2.48l-7.17-18.74h-49.06l-6.98,18.74c-.25.74-.8,1.56-1.65,2.48-.86.92-2.33,1.38-4.41,1.38h-22.6ZM393.08,291.94h34.18l-17.27-48.51-16.9,48.51Z"/>
+            <path class="cls-2" d="M493.39,341c-1.35,0-2.45-.43-3.31-1.29-.86-.86-1.29-1.96-1.29-3.31v-119.43c0-1.35.43-2.45,1.29-3.31s1.96-1.29,3.31-1.29h24.62c1.35,0,2.45.43,3.31,1.29.86.86,1.29,1.96,1.29,3.31v119.43c0,1.35-.43,2.45-1.29,3.31s-1.96,1.29-3.31,1.29h-24.62Z"/>
+          </g>
+        </svg>`,
+      "ai-black-transparent": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566.93 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill-rule: evenodd;
+                opacity: .5;
+              }
+
+              .cls-2 {
+                fill: #fff;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M272.03,100.72c100.92,0,182.74,81.82,182.74,182.75s-81.82,182.74-182.74,182.74-182.75-81.82-182.75-182.74,81.82-182.75,182.75-182.75"/>
+          <g>
+            <path class="cls-2" d="M170.79,353.74c-1.08,0-2.05-.43-2.92-1.31-.88-.87-1.31-1.84-1.31-2.92,0-.67.07-1.27.2-1.81l47.34-129.32c.4-1.48,1.24-2.79,2.52-3.93,1.27-1.14,3.05-1.71,5.34-1.71h29.81c2.28,0,4.06.57,5.34,1.71,1.27,1.14,2.11,2.45,2.52,3.93l47.14,129.32c.27.54.4,1.14.4,1.81,0,1.08-.44,2.05-1.31,2.92s-1.91,1.31-3.12,1.31h-24.78c-2.01,0-3.52-.5-4.53-1.51-1.01-1.01-1.65-1.91-1.91-2.72l-7.86-20.55h-53.78l-7.65,20.55c-.27.81-.88,1.71-1.81,2.72-.94,1.01-2.55,1.51-4.83,1.51h-24.78ZM218.13,299.96h37.47l-18.93-53.18-18.53,53.18Z"/>
+            <path class="cls-2" d="M328.11,353.74c-1.48,0-2.69-.47-3.63-1.41-.94-.94-1.41-2.15-1.41-3.63v-130.93c0-1.48.47-2.68,1.41-3.63s2.15-1.41,3.63-1.41h26.99c1.48,0,2.68.47,3.63,1.41.94.94,1.41,2.15,1.41,3.63v130.93c0,1.48-.47,2.69-1.41,3.63-.94.94-2.15,1.41-3.63,1.41h-26.99Z"/>
+          </g>
+        </svg>`,
+      "ai-black": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566.93 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill-rule: evenodd;
+              }
+
+              .cls-2 {
+                fill: #fff;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M272.03,100.72c100.92,0,182.74,81.82,182.74,182.75s-81.82,182.74-182.74,182.74-182.75-81.82-182.75-182.74,81.82-182.75,182.75-182.75"/>
+          <g>
+            <path class="cls-2" d="M170.79,353.74c-1.08,0-2.05-.43-2.92-1.31-.88-.87-1.31-1.84-1.31-2.92,0-.67.07-1.27.2-1.81l47.34-129.32c.4-1.48,1.24-2.79,2.52-3.93,1.27-1.14,3.05-1.71,5.34-1.71h29.81c2.28,0,4.06.57,5.34,1.71,1.27,1.14,2.11,2.45,2.52,3.93l47.14,129.32c.27.54.4,1.14.4,1.81,0,1.08-.44,2.05-1.31,2.92s-1.91,1.31-3.12,1.31h-24.78c-2.01,0-3.52-.5-4.53-1.51-1.01-1.01-1.65-1.91-1.91-2.72l-7.86-20.55h-53.78l-7.65,20.55c-.27.81-.88,1.71-1.81,2.72-.94,1.01-2.55,1.51-4.83,1.51h-24.78ZM218.13,299.96h37.47l-18.93-53.18-18.53,53.18Z"/>
+            <path class="cls-2" d="M328.11,353.74c-1.48,0-2.69-.47-3.63-1.41-.94-.94-1.41-2.15-1.41-3.63v-130.93c0-1.48.47-2.68,1.41-3.63s2.15-1.41,3.63-1.41h26.99c1.48,0,2.68.47,3.63,1.41.94.94,1.41,2.15,1.41,3.63v130.93c0,1.48-.47,2.69-1.41,3.63-.94.94-2.15,1.41-3.63,1.41h-26.99Z"/>
+          </g>
+        </svg>`,
+      "ai-white-transparent": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566.93 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill: #1d1d1b;
+              }
+
+              .cls-2 {
+                fill: #fff;
+                fill-rule: evenodd;
+                opacity: .5;
+              }
+            </style>
+          </defs>
+          <path class="cls-2" d="M272.03,100.72c100.92,0,182.74,81.82,182.74,182.75s-81.82,182.74-182.74,182.74-182.75-81.82-182.75-182.74,81.82-182.75,182.75-182.75"/>
+          <g>
+            <path class="cls-1" d="M170.79,353.74c-1.08,0-2.05-.43-2.92-1.31-.88-.87-1.31-1.84-1.31-2.92,0-.67.07-1.27.2-1.81l47.34-129.32c.4-1.48,1.24-2.79,2.52-3.93,1.27-1.14,3.05-1.71,5.34-1.71h29.81c2.28,0,4.06.57,5.34,1.71,1.27,1.14,2.11,2.45,2.52,3.93l47.14,129.32c.27.54.4,1.14.4,1.81,0,1.08-.44,2.05-1.31,2.92s-1.91,1.31-3.12,1.31h-24.78c-2.01,0-3.52-.5-4.53-1.51-1.01-1.01-1.65-1.91-1.91-2.72l-7.86-20.55h-53.78l-7.65,20.55c-.27.81-.88,1.71-1.81,2.72-.94,1.01-2.55,1.51-4.83,1.51h-24.78ZM218.13,299.96h37.47l-18.93-53.18-18.53,53.18Z"/>
+            <path class="cls-1" d="M328.11,353.74c-1.48,0-2.69-.47-3.63-1.41-.94-.94-1.41-2.15-1.41-3.63v-130.93c0-1.48.47-2.68,1.41-3.63s2.15-1.41,3.63-1.41h26.99c1.48,0,2.68.47,3.63,1.41.94.94,1.41,2.15,1.41,3.63v130.93c0,1.48-.47,2.69-1.41,3.63-.94.94-2.15,1.41-3.63,1.41h-26.99Z"/>
+          </g>
+        </svg>`,
+      "ai-white": `
+        <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566.93 566.93">
+          <defs>
+            <style>
+              .cls-1 {
+                fill: #fff;
+                fill-rule: evenodd;
+              }
+
+              .cls-2 {
+                fill: #1d1d1b;
+              }
+            </style>
+          </defs>
+          <path class="cls-1" d="M272.03,100.72c100.92,0,182.74,81.82,182.74,182.75s-81.82,182.74-182.74,182.74-182.75-81.82-182.75-182.74,81.82-182.75,182.75-182.75"/>
+          <g>
+            <path class="cls-2" d="M170.79,353.74c-1.08,0-2.05-.43-2.92-1.31-.88-.87-1.31-1.84-1.31-2.92,0-.67.07-1.27.2-1.81l47.34-129.32c.4-1.48,1.24-2.79,2.52-3.93,1.27-1.14,3.05-1.71,5.34-1.71h29.81c2.28,0,4.06.57,5.34,1.71,1.27,1.14,2.11,2.45,2.52,3.93l47.14,129.32c.27.54.4,1.14.4,1.81,0,1.08-.44,2.05-1.31,2.92s-1.91,1.31-3.12,1.31h-24.78c-2.01,0-3.52-.5-4.53-1.51-1.01-1.01-1.65-1.91-1.91-2.72l-7.86-20.55h-53.78l-7.65,20.55c-.27.81-.88,1.71-1.81,2.72-.94,1.01-2.55,1.51-4.83,1.51h-24.78ZM218.13,299.96h37.47l-18.93-53.18-18.53,53.18Z"/>
+            <path class="cls-2" d="M328.11,353.74c-1.48,0-2.69-.47-3.63-1.41-.94-.94-1.41-2.15-1.41-3.63v-130.93c0-1.48.47-2.68,1.41-3.63s2.15-1.41,3.63-1.41h26.99c1.48,0,2.68.47,3.63,1.41.94.94,1.41,2.15,1.41,3.63v130.93c0,1.48-.47,2.69-1.41,3.63-.94.94-2.15,1.41-3.63,1.41h-26.99Z"/>
           </g>
         </svg>`
     };
@@ -713,10 +1358,12 @@
       if (!sourceImage) {
         els.canvas.width = 0;
         els.canvas.height = 0;
+        els.canvasSurface.classList.remove("has-image");
         els.downloadButton.disabled = true;
         return;
       }
 
+      els.canvasSurface.classList.add("has-image");
       const width = imageWidth(sourceImage);
       const height = imageHeight(sourceImage);
       els.canvas.width = width;
@@ -785,17 +1432,6 @@
       });
     }
 
-    function parseCustomMetadata() {
-      const raw = els.customMetadata.value.trim();
-      if (!raw) return {};
-
-      const parsed = JSON.parse(raw);
-      if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
-        throw new Error("Custom metadata must be a JSON object.");
-      }
-      return parsed;
-    }
-
     function omitNullValues(value) {
       if (value === null || value === undefined) return undefined;
 
@@ -817,27 +1453,39 @@
       return value;
     }
 
+    function parseCreatorNames(value) {
+      const seen = new Set();
+      return String(value || "")
+        .split(/\r?\n|;/)
+        .map(name => name.trim())
+        .filter(name => {
+          if (!name || seen.has(name)) return false;
+          seen.add(name);
+          return true;
+        });
+    }
+
     function collectMetadata() {
       return {
         title: els.title.value.trim(),
         description: els.description.value.trim(),
+        altTextAccessibility: els.altTextAccessibility.value.trim(),
+        creators: parseCreatorNames(els.creator.value),
         digitalSourceType: els.digitalSourceType.value.trim(),
         aiSystemUsed: els.aiSystemUsed.value.trim(),
         aiSystemVersionUsed: els.aiSystemVersionUsed.value.trim() || null,
         aiPromptInformation: els.aiPromptInformation.value.trim(),
         aiPromptWriterName: els.aiPromptWriterName.value.trim(),
-        aiPromptWriterOrganisation: els.aiPromptWriterOrganisation.value.trim(),
         creditLine: els.creditLine.value.trim(),
-        disclosure: els.disclosure.value.trim(),
         processing: {
           tool: "AI Image Transparency Tool",
           metadataMode: els.metadataMode.value,
           badgeId: els.defaultBadge.value,
           badgePosition: els.position.value,
           operations: parseProcessingOperations(),
-          exportedAt: new Date().toISOString()
-        },
-        custom: parseCustomMetadata()
+          exportedAt: new Date().toISOString(),
+          createDate: null
+        }
       };
     }
 
@@ -872,13 +1520,118 @@
       return result;
     }
 
+    function captureMetadataFormState() {
+      return {
+        title: els.title.value,
+        description: els.description.value,
+        altTextAccessibility: els.altTextAccessibility.value,
+        creator: els.creator.value,
+        digitalSourceType: els.digitalSourceType.value,
+        aiSystemUsed: els.aiSystemUsed.value,
+        aiSystemVersionUsed: els.aiSystemVersionUsed.value,
+        aiPromptInformation: els.aiPromptInformation.value,
+        aiPromptWriterName: els.aiPromptWriterName.value,
+        creditLine: els.creditLine.value,
+        processingOperations: els.processingOperations.value
+      };
+    }
+
+    function cloneMetadataFormState(state) {
+      return { ...state };
+    }
+
+    function applyMetadataFormState(state) {
+      if (!state) return;
+      els.title.value = state.title ?? "";
+      els.description.value = state.description ?? "";
+      els.altTextAccessibility.value = state.altTextAccessibility ?? "";
+      els.creator.value = state.creator ?? "";
+      els.digitalSourceType.value = state.digitalSourceType ?? "";
+      els.aiSystemUsed.value = state.aiSystemUsed ?? "";
+      els.aiSystemVersionUsed.value = state.aiSystemVersionUsed ?? "";
+      els.aiPromptInformation.value = state.aiPromptInformation ?? "";
+      els.aiPromptWriterName.value = state.aiPromptWriterName ?? "";
+      els.creditLine.value = state.creditLine ?? "";
+      els.processingOperations.value = state.processingOperations ?? "";
+    }
+
+    function parseOperationsFromText(value) {
+      try {
+        const parsed = JSON.parse(String(value || "").trim() || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function buildUpdateModeFormState() {
+      const state = cloneMetadataFormState(initialMetadataFormState);
+      const existing = extractKnownXmpFields(sourceMetadata.xmp);
+      const assignExisting = (key, value) => {
+        if (value !== null && value !== undefined && String(value).trim() !== "") {
+          state[key] = String(value);
+        }
+      };
+
+      assignExisting("title", existing.title);
+      assignExisting("description", existing.description);
+      assignExisting("altTextAccessibility", existing.altTextAccessibility);
+      if (Array.isArray(existing.creators) && existing.creators.length) {
+        state.creator = existing.creators.join("; ");
+      }
+      assignExisting("digitalSourceType", existing.digitalSourceType);
+      assignExisting("aiSystemUsed", existing.aiSystemUsed);
+      assignExisting("aiSystemVersionUsed", existing.aiSystemVersionUsed);
+      assignExisting("aiPromptInformation", existing.aiPromptInformation);
+      assignExisting("aiPromptWriterName", existing.aiPromptWriterName);
+      assignExisting("creditLine", existing.creditLine);
+
+      const existingOperations = Array.isArray(existing.processing?.operations)
+        ? existing.processing.operations
+        : [];
+      const defaultOperations = parseOperationsFromText(initialMetadataFormState.processingOperations);
+      state.processingOperations = JSON.stringify(
+        deduplicateOperations([...existingOperations, ...defaultOperations]),
+        null,
+        2
+      );
+
+      return state;
+    }
+
+    function resetMetadataFormForSource() {
+      metadataFormStates = { update: null, replace: null };
+      activeMetadataMode = els.metadataMode.value;
+      const state = activeMetadataMode === "update"
+        ? buildUpdateModeFormState()
+        : cloneMetadataFormState(initialMetadataFormState);
+      applyMetadataFormState(state);
+      metadataFormStates[activeMetadataMode] = captureMetadataFormState();
+    }
+
+    function switchMetadataMode() {
+      metadataFormStates[activeMetadataMode] = captureMetadataFormState();
+      activeMetadataMode = els.metadataMode.value;
+
+      let state = metadataFormStates[activeMetadataMode];
+      if (!state) {
+        state = activeMetadataMode === "update"
+          ? buildUpdateModeFormState()
+          : cloneMetadataFormState(initialMetadataFormState);
+      }
+
+      applyMetadataFormState(state);
+      metadataFormStates[activeMetadataMode] = captureMetadataFormState();
+      lastExportReport = null;
+      queueRender();
+    }
+
     function resolveMetadata(metadata) {
       if (metadata.processing.metadataMode !== "update") return metadata;
 
       const existing = extractKnownXmpFields(sourceMetadata.xmp);
       const prefer = (value, oldValue) => value || oldValue || "";
       const version = metadata.aiSystemVersionUsed || existing.aiSystemVersionUsed || null;
-      const existingCustom = existing.custom && typeof existing.custom === "object" ? existing.custom : {};
       const existingOperations = Array.isArray(existing.processing?.operations)
         ? existing.processing.operations
         : [];
@@ -894,19 +1647,21 @@
         ...metadata,
         title: prefer(metadata.title, existing.title),
         description: prefer(metadata.description, existing.description),
+        altTextAccessibility: prefer(metadata.altTextAccessibility, existing.altTextAccessibility),
+        creators: Array.isArray(metadata.creators) && metadata.creators.length
+          ? metadata.creators
+          : (Array.isArray(existing.creators) ? existing.creators : []),
         digitalSourceType: prefer(metadata.digitalSourceType, existing.digitalSourceType),
         aiSystemUsed: prefer(metadata.aiSystemUsed, existing.aiSystemUsed),
         aiSystemVersionUsed: version,
         aiPromptInformation: prefer(metadata.aiPromptInformation, existing.aiPromptInformation),
         aiPromptWriterName: prefer(metadata.aiPromptWriterName, existing.aiPromptWriterName),
-        aiPromptWriterOrganisation: prefer(metadata.aiPromptWriterOrganisation, existing.aiPromptWriterOrganisation),
         creditLine: prefer(metadata.creditLine, existing.creditLine),
-        disclosure: prefer(metadata.disclosure, existing.disclosure),
         processing: {
           ...metadata.processing,
+          createDate: existing.createDate || metadata.processing.createDate || metadata.processing.exportedAt,
           operations: mergedOperations
-        },
-        custom: { ...existingCustom, ...metadata.custom }
+        }
       };
     }
 
@@ -915,73 +1670,189 @@
 
       const RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
       const DC_NS = "http://purl.org/dc/elements/1.1/";
+      const IPTC_CORE_NS = "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/";
       const IPTC_EXT_NS = "http://iptc.org/std/Iptc4xmpExt/2008-02-29/";
       const PHOTOSHOP_NS = "http://ns.adobe.com/photoshop/1.0/";
-      const AIB_NS = "urn:ai-image-badge:metadata:1.0";
+      const XMP_NS = "http://ns.adobe.com/xap/1.0/";
+      const XMP_MM_NS = "http://ns.adobe.com/xap/1.0/mm/";
+      const ST_EVT_NS = "http://ns.adobe.com/xap/1.0/sType/ResourceEvent#";
+      const AIT_NS = "https://openpotato.github.io/ai-image-transparency-tool/ns/1.0/";
+      const LEGACY_AIB_NS = "urn:ai-image-badge:metadata:1.0";
       const doc = new DOMParser().parseFromString(xmp, "application/xml");
       if (doc.querySelector("parsererror")) return {};
 
-      const description = doc.getElementsByTagNameNS(RDF_NS, "Description")[0];
-      if (!description) return {};
+      const descriptions = [...doc.getElementsByTagNameNS(RDF_NS, "Description")];
+      if (!descriptions.length) return {};
 
       const simpleValue = (namespace, localName) => {
-        const attribute = description.getAttributeNS(namespace, localName);
-        if (attribute) return attribute;
-        const element = [...description.children].find(
-          child => child.namespaceURI === namespace && child.localName === localName
-        );
-        return element?.textContent?.trim() || "";
+        for (const description of descriptions) {
+          const attribute = description.getAttributeNS(namespace, localName);
+          if (attribute) return attribute;
+          const element = [...description.children].find(
+            child => child.namespaceURI === namespace && child.localName === localName
+          );
+          const value = element?.textContent?.trim() || "";
+          if (value) return value;
+        }
+        return "";
       };
 
-      const altValue = localName => {
-        const element = [...description.children].find(
-          child => child.namespaceURI === DC_NS && child.localName === localName
-        );
-        if (!element) return description.getAttributeNS(DC_NS, localName) || "";
-        const items = [...element.getElementsByTagNameNS(RDF_NS, "li")];
-        const preferred = items.find(item => item.getAttribute("xml:lang") === "x-default") || items[0];
-        return preferred?.textContent?.trim() || element.textContent?.trim() || "";
-      };
-
-      let processing = null;
-      const processingJson = simpleValue(AIB_NS, "ProcessingJson");
-      if (processingJson) {
-        try {
-          const parsed = JSON.parse(processingJson);
-          if (parsed && !Array.isArray(parsed) && typeof parsed === "object") {
-            processing = parsed;
+      const altValue = (namespace, localName) => {
+        for (const description of descriptions) {
+          const element = [...description.children].find(
+            child => child.namespaceURI === namespace && child.localName === localName
+          );
+          if (element) {
+            const items = [...element.getElementsByTagNameNS(RDF_NS, "li")];
+            const preferred = items.find(item => item.getAttribute("xml:lang") === "x-default") || items[0];
+            const value = preferred?.textContent?.trim() || element.textContent?.trim() || "";
+            if (value) return value;
           }
-        } catch {
-          // Ignore malformed processing JSON from the source.
+          const attribute = description.getAttributeNS(namespace, localName);
+          if (attribute) return attribute;
         }
-      }
+        return "";
+      };
 
-      let custom = {};
-      const customJson = simpleValue(AIB_NS, "CustomJson");
-      if (customJson) {
+      const arrayValues = (namespace, localName) => {
+        const result = [];
+        const seen = new Set();
+        for (const description of descriptions) {
+          const element = [...description.children].find(
+            child => child.namespaceURI === namespace && child.localName === localName
+          );
+          if (element) {
+            const items = [...element.getElementsByTagNameNS(RDF_NS, "li")];
+            for (const item of items) {
+              const value = item.textContent?.trim() || "";
+              if (value && !seen.has(value)) {
+                seen.add(value);
+                result.push(value);
+              }
+            }
+            if (!items.length) {
+              const value = element.textContent?.trim() || "";
+              if (value && !seen.has(value)) {
+                seen.add(value);
+                result.push(value);
+              }
+            }
+          }
+          const attribute = description.getAttributeNS(namespace, localName);
+          if (attribute && !seen.has(attribute)) {
+            seen.add(attribute);
+            result.push(attribute);
+          }
+        }
+        return result;
+      };
+
+      const readJsonObject = (namespace, localName) => {
+        const raw = simpleValue(namespace, localName);
+        if (!raw) return null;
         try {
-          const parsed = JSON.parse(customJson);
-          if (parsed && !Array.isArray(parsed) && typeof parsed === "object") custom = parsed;
+          const parsed = JSON.parse(raw);
+          return parsed && !Array.isArray(parsed) && typeof parsed === "object" ? parsed : null;
         } catch {
-          // Ignore malformed custom JSON from the source.
+          return null;
+        }
+      };
+
+      const historyOperations = [];
+      for (const description of descriptions) {
+        const history = [...description.children].find(
+          child => child.namespaceURI === XMP_MM_NS && child.localName === "History"
+        );
+        const sequence = history
+          ? [...history.children].find(child => child.namespaceURI === RDF_NS && child.localName === "Seq")
+          : null;
+        if (!sequence) continue;
+
+        for (const item of [...sequence.children].filter(
+          child => child.namespaceURI === RDF_NS && child.localName === "li"
+        )) {
+          const eventValue = localName => {
+            const attribute = item.getAttributeNS(ST_EVT_NS, localName);
+            if (attribute) return attribute;
+            const element = [...item.children].find(
+              child => child.namespaceURI === ST_EVT_NS && child.localName === localName
+            );
+            return element?.textContent?.trim() || "";
+          };
+          const action = eventValue("action");
+          const parameters = eventValue("parameters");
+          if (!action && !parameters) continue;
+          historyOperations.push(omitNullValues({
+            type: action || "edited",
+            description: parameters || action,
+            when: eventValue("when") || null,
+            softwareAgent: eventValue("softwareAgent") || null,
+            changed: eventValue("changed") || null
+          }));
         }
       }
 
+      const legacyProcessing = readJsonObject(AIT_NS, "ProcessingJson")
+        || readJsonObject(LEGACY_AIB_NS, "ProcessingJson");
+      const processing = legacyProcessing || (historyOperations.length ? { operations: historyOperations } : null);
       return {
-        title: altValue("title"),
-        description: altValue("description"),
+        title: altValue(DC_NS, "title"),
+        description: altValue(DC_NS, "description"),
+        altTextAccessibility: altValue(IPTC_CORE_NS, "AltTextAccessibility"),
+        creators: arrayValues(DC_NS, "creator"),
         digitalSourceType: simpleValue(IPTC_EXT_NS, "DigitalSourceType"),
         aiSystemUsed: simpleValue(IPTC_EXT_NS, "AISystemUsed"),
         aiSystemVersionUsed: simpleValue(IPTC_EXT_NS, "AISystemVersionUsed") || null,
         aiPromptInformation: simpleValue(IPTC_EXT_NS, "AIPromptInformation"),
         aiPromptWriterName: simpleValue(IPTC_EXT_NS, "AIPromptWriterName"),
-        aiPromptWriterOrganisation: simpleValue(AIB_NS, "PromptWriterOrganisation")
-          || simpleValue(IPTC_EXT_NS, "AIPromptWriterOrganisation"),
         creditLine: simpleValue(PHOTOSHOP_NS, "Credit"),
-        disclosure: simpleValue(AIB_NS, "Disclosure"),
-        processing,
-        custom
+        createDate: simpleValue(XMP_NS, "CreateDate") || null,
+        processing
       };
+    }
+
+    function mapOperationToXmpHistoryEvent(operation, processing) {
+      const type = typeof operation?.type === "string" ? operation.type.trim() : "";
+      const description = typeof operation?.description === "string" ? operation.description.trim() : "";
+      const normalized = type.toLowerCase();
+      const importedHistoryEvent = Boolean(operation?.when || operation?.softwareAgent || operation?.changed);
+      const action = importedHistoryEvent
+        ? (type || "edited")
+        : normalized.includes("nongenerative") || normalized.includes("edit") || normalized.includes("composite")
+          ? "edited"
+          : normalized.includes("generat") || normalized.includes("creat")
+            ? "created"
+            : normalized.includes("resiz")
+              ? "resized"
+              : normalized.includes("crop")
+                ? "cropped"
+                : normalized.includes("convert")
+                  ? "converted"
+                  : "edited";
+      return omitNullValues({
+        "stEvt:action": action,
+        "stEvt:parameters": importedHistoryEvent
+          ? description
+          : type ? `[${type}] ${description}` : description,
+        "stEvt:softwareAgent": operation.softwareAgent || processing.tool,
+        "stEvt:when": operation.when || processing.exportedAt,
+        "stEvt:changed": operation.changed || "/"
+      });
+    }
+
+    function buildXmpHistoryReport(metadata) {
+      const operations = Array.isArray(metadata.processing.operations)
+        ? metadata.processing.operations
+        : [];
+      const events = operations.map(operation => mapOperationToXmpHistoryEvent(operation, metadata.processing));
+      events.push({
+        "stEvt:action": "saved",
+        "stEvt:parameters": `Badge ${metadata.processing.badgeId} at ${metadata.processing.badgePosition}; metadata mode ${metadata.processing.metadataMode}.`,
+        "stEvt:softwareAgent": metadata.processing.tool,
+        "stEvt:when": metadata.processing.exportedAt,
+        "stEvt:changed": "/"
+      });
+      return events;
     }
 
     function buildXmpFieldReport(metadata) {
@@ -991,17 +1862,16 @@
         "Iptc4xmpExt:AISystemVersionUsed": metadata.aiSystemVersionUsed,
         "Iptc4xmpExt:AIPromptInformation": metadata.aiPromptInformation || null,
         "Iptc4xmpExt:AIPromptWriterName": metadata.aiPromptWriterName || null,
-        "aib:PromptWriterOrganisation": metadata.aiPromptWriterOrganisation || null,
-        "xmp:CreateDate": metadata.processing.exportedAt,
+        "Iptc4xmpCore:AltTextAccessibility": metadata.altTextAccessibility || null,
+        "xmp:CreateDate": metadata.processing.createDate || metadata.processing.exportedAt,
         "xmp:ModifyDate": metadata.processing.exportedAt,
         "xmp:MetadataDate": metadata.processing.exportedAt,
         "xmp:CreatorTool": metadata.processing.tool,
+        "xmpMM:History": buildXmpHistoryReport(metadata),
         "dc:title": metadata.title || null,
         "dc:description": metadata.description || null,
-        "photoshop:Credit": metadata.creditLine || null,
-        "aib:Disclosure": metadata.disclosure || null,
-        "aib:ProcessingJson": JSON.stringify(omitNullValues(metadata.processing)),
-        "aib:CustomJson": JSON.stringify(omitNullValues(metadata.custom))
+        "dc:creator": Array.isArray(metadata.creators) && metadata.creators.length ? metadata.creators : null,
+        "photoshop:Credit": metadata.creditLine || null
       });
     }
 
@@ -1010,16 +1880,15 @@
         ...(exportDetails ?? {}),
         title: metadata.title,
         description: metadata.description,
+        altTextAccessibility: metadata.altTextAccessibility,
+        creators: metadata.creators,
         digitalSourceType: metadata.digitalSourceType,
         aiSystemUsed: metadata.aiSystemUsed,
         aiSystemVersionUsed: metadata.aiSystemVersionUsed,
         aiPromptInformation: metadata.aiPromptInformation,
         aiPromptWriterName: metadata.aiPromptWriterName,
-        aiPromptWriterOrganisation: metadata.aiPromptWriterOrganisation,
         creditLine: metadata.creditLine,
-        disclosure: metadata.disclosure,
         processing: metadata.processing,
-        custom: metadata.custom,
         xmp_fields: buildXmpFieldReport(metadata),
         security_note: SECURITY_NOTE
       };
@@ -1671,14 +2540,159 @@
       return element;
     }
 
+    function directChild(parent, namespace, localName) {
+      return [...parent.children].find(
+        child => child.namespaceURI === namespace && child.localName === localName
+      ) || null;
+    }
+
+    function directChildText(parent, namespace, localName) {
+      const attribute = parent.getAttributeNS(namespace, localName);
+      if (attribute) return attribute;
+      return directChild(parent, namespace, localName)?.textContent?.trim() || "";
+    }
+
+    function appendXmpHistoryEvent(doc, sequence, event, namespaces) {
+      const item = doc.createElementNS(namespaces.RDF_NS, "rdf:li");
+      item.setAttributeNS(namespaces.RDF_NS, "rdf:parseType", "Resource");
+      for (const [localName, value] of Object.entries(event)) {
+        if (!value) continue;
+        appendSimpleElement(doc, item, namespaces.ST_EVT_NS, `stEvt:${localName}`, value);
+      }
+      sequence.appendChild(item);
+    }
+
+    function mergeStandardXmpHistory(doc, description, metadata, namespaces) {
+      let history = directChild(description, namespaces.XMP_MM_NS, "History");
+      if (!history) {
+        history = doc.createElementNS(namespaces.XMP_MM_NS, "xmpMM:History");
+        description.appendChild(history);
+      }
+
+      let sequence = directChild(history, namespaces.RDF_NS, "Seq");
+      if (!sequence) {
+        history.replaceChildren();
+        sequence = doc.createElementNS(namespaces.RDF_NS, "rdf:Seq");
+        history.appendChild(sequence);
+      }
+
+      const existingKeys = new Set();
+      for (const item of [...sequence.children].filter(
+        child => child.namespaceURI === namespaces.RDF_NS && child.localName === "li"
+      )) {
+        const action = directChildText(item, namespaces.ST_EVT_NS, "action");
+        const parameters = directChildText(item, namespaces.ST_EVT_NS, "parameters");
+        existingKeys.add(`${action}\u0000${parameters}`);
+      }
+
+      for (const operation of Array.isArray(metadata.processing.operations) ? metadata.processing.operations : []) {
+        const reportEvent = mapOperationToXmpHistoryEvent(operation, metadata.processing);
+        const event = {
+          action: reportEvent["stEvt:action"],
+          parameters: reportEvent["stEvt:parameters"],
+          softwareAgent: reportEvent["stEvt:softwareAgent"],
+          when: reportEvent["stEvt:when"],
+          changed: reportEvent["stEvt:changed"]
+        };
+        const key = `${event.action}\u0000${event.parameters}`;
+        if (existingKeys.has(key)) continue;
+        existingKeys.add(key);
+        appendXmpHistoryEvent(doc, sequence, event, namespaces);
+      }
+
+      const savedEvent = {
+        action: "saved",
+        parameters: `Badge ${metadata.processing.badgeId} at ${metadata.processing.badgePosition}; metadata mode ${metadata.processing.metadataMode}.`,
+        softwareAgent: metadata.processing.tool,
+        when: metadata.processing.exportedAt,
+        changed: "/"
+      };
+      appendXmpHistoryEvent(doc, sequence, savedEvent, namespaces);
+    }
+
+    function removeNamespaceProperties(description, namespace) {
+      const elements = [description, ...description.getElementsByTagName("*")];
+      for (const element of elements) {
+        for (const attribute of [...element.attributes]) {
+          if (attribute.namespaceURI === namespace) {
+            element.removeAttributeNS(namespace, attribute.localName);
+          }
+        }
+      }
+      for (const element of elements.reverse()) {
+        if (element !== description && element.namespaceURI === namespace) element.remove();
+      }
+    }
+
+    function removeNamespaceDeclarations(doc, declarations) {
+      const XMLNS_NS = "http://www.w3.org/2000/xmlns/";
+      const namespaces = new Set(declarations.map(([, namespace]) => namespace));
+      for (const element of [...doc.getElementsByTagName("*")]) {
+        for (const attribute of [...element.attributes]) {
+          if (attribute.namespaceURI === XMLNS_NS && namespaces.has(attribute.value)) {
+            element.removeAttributeNS(XMLNS_NS, attribute.localName);
+          }
+        }
+      }
+    }
+
+    function removeLegacyToolProperties(description, namespaces) {
+      // The tool-specific namespaces are no longer emitted. Remove every property
+      // from both historical namespaces before serializing an updated packet.
+      removeNamespaceProperties(description, namespaces.LEGACY_AIB_NS);
+      removeNamespaceProperties(description, namespaces.AIT_NS);
+
+      // This property was used experimentally but was never standardized by IPTC.
+      description.removeAttributeNS(namespaces.IPTC_EXT_NS, "AIPromptWriterOrganisation");
+      removeDirectChildren(description, namespaces.IPTC_EXT_NS, "AIPromptWriterOrganisation");
+    }
+
+    function replaceLangAltXmpProperty(doc, description, namespace, qualifiedName, value, namespaces) {
+      const localName = qualifiedName.split(":").pop();
+      description.removeAttributeNS(namespace, localName);
+      removeDirectChildren(description, namespace, localName);
+      if (!value) return;
+
+      const property = doc.createElementNS(namespace, qualifiedName);
+      const alt = doc.createElementNS(namespaces.RDF_NS, "rdf:Alt");
+      const item = doc.createElementNS(namespaces.RDF_NS, "rdf:li");
+      item.setAttributeNS(namespaces.XML_NS, "xml:lang", "x-default");
+      item.textContent = value;
+      alt.appendChild(item);
+      property.appendChild(alt);
+      description.appendChild(property);
+    }
+
+    function replaceOrderedArrayXmpProperty(doc, description, namespace, qualifiedName, values, namespaces) {
+      const localName = qualifiedName.split(":").pop();
+      description.removeAttributeNS(namespace, localName);
+      removeDirectChildren(description, namespace, localName);
+      const items = Array.isArray(values) ? values.filter(Boolean) : [];
+      if (!items.length) return;
+
+      const property = doc.createElementNS(namespace, qualifiedName);
+      const sequence = doc.createElementNS(namespaces.RDF_NS, "rdf:Seq");
+      for (const value of items) {
+        const item = doc.createElementNS(namespaces.RDF_NS, "rdf:li");
+        item.textContent = value;
+        sequence.appendChild(item);
+      }
+      property.appendChild(sequence);
+      description.appendChild(property);
+    }
+
     function buildOrUpdateXmpPacket(existingXmp, metadata, format) {
       const RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
       const DC_NS = "http://purl.org/dc/elements/1.1/";
       const XMP_NS = "http://ns.adobe.com/xap/1.0/";
       const TIFF_NS = "http://ns.adobe.com/tiff/1.0/";
+      const IPTC_CORE_NS = "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/";
       const IPTC_EXT_NS = "http://iptc.org/std/Iptc4xmpExt/2008-02-29/";
       const PHOTOSHOP_NS = "http://ns.adobe.com/photoshop/1.0/";
-      const AIB_NS = "urn:ai-image-badge:metadata:1.0";
+      const XMP_MM_NS = "http://ns.adobe.com/xap/1.0/mm/";
+      const ST_EVT_NS = "http://ns.adobe.com/xap/1.0/sType/ResourceEvent#";
+      const AIT_NS = "https://openpotato.github.io/ai-image-transparency-tool/ns/1.0/";
+      const LEGACY_AIB_NS = "urn:ai-image-badge:metadata:1.0";
       const XML_NS = "http://www.w3.org/XML/1998/namespace";
       const parser = new DOMParser();
 
@@ -1708,12 +2722,18 @@
       ensureNamespace(description, "dc", DC_NS);
       ensureNamespace(description, "xmp", XMP_NS);
       ensureNamespace(description, "tiff", TIFF_NS);
+      ensureNamespace(description, "Iptc4xmpCore", IPTC_CORE_NS);
       ensureNamespace(description, "Iptc4xmpExt", IPTC_EXT_NS);
       ensureNamespace(description, "photoshop", PHOTOSHOP_NS);
-      ensureNamespace(description, "aib", AIB_NS);
+      ensureNamespace(description, "xmpMM", XMP_MM_NS);
+      ensureNamespace(description, "stEvt", ST_EVT_NS);
 
       description.setAttributeNS(XMP_NS, "xmp:CreatorTool", metadata.processing.tool);
-      description.setAttributeNS(XMP_NS, "xmp:CreateDate", metadata.processing.exportedAt);
+      description.setAttributeNS(
+        XMP_NS,
+        "xmp:CreateDate",
+        metadata.processing.createDate || metadata.processing.exportedAt
+      );
       description.setAttributeNS(XMP_NS, "xmp:ModifyDate", metadata.processing.exportedAt);
       description.setAttributeNS(XMP_NS, "xmp:MetadataDate", metadata.processing.exportedAt);
       description.setAttributeNS(TIFF_NS, "tiff:Orientation", "1");
@@ -1723,45 +2743,47 @@
       replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AISystemVersionUsed", metadata.aiSystemVersionUsed);
       replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AIPromptInformation", metadata.aiPromptInformation);
       replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AIPromptWriterName", metadata.aiPromptWriterName);
-      replaceSimpleXmpProperty(doc, description, IPTC_EXT_NS, "Iptc4xmpExt:AIPromptWriterOrganisation", null);
-      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:PromptWriterOrganisation", metadata.aiPromptWriterOrganisation);
       replaceSimpleXmpProperty(doc, description, PHOTOSHOP_NS, "photoshop:Credit", metadata.creditLine);
-      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:Disclosure", metadata.disclosure);
-      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:ProcessingJson", JSON.stringify(omitNullValues(metadata.processing)));
-      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:CustomJson", JSON.stringify(omitNullValues(metadata.custom)));
-      replaceSimpleXmpProperty(doc, description, AIB_NS, "aib:MetadataJson", JSON.stringify(omitNullValues(metadata)));
+      for (const item of [...rdf.getElementsByTagNameNS(RDF_NS, "Description")]) {
+        removeLegacyToolProperties(item, {
+          IPTC_EXT_NS,
+          AIT_NS,
+          LEGACY_AIB_NS
+        });
+      }
+      removeNamespaceDeclarations(doc, [
+        ["ait", AIT_NS],
+        ["aib", LEGACY_AIB_NS]
+      ]);
+      mergeStandardXmpHistory(doc, description, metadata, {
+        RDF_NS,
+        XMP_MM_NS,
+        ST_EVT_NS
+      });
 
       description.removeAttributeNS(DC_NS, "format");
       removeDirectChildren(description, DC_NS, "format");
       appendSimpleElement(doc, description, DC_NS, "dc:format", format);
 
-      removeDirectChildren(description, DC_NS, "title");
-      description.removeAttributeNS(DC_NS, "title");
-      if (metadata.title) {
-
-        const title = doc.createElementNS(DC_NS, "dc:title");
-        const alt = doc.createElementNS(RDF_NS, "rdf:Alt");
-        const item = doc.createElementNS(RDF_NS, "rdf:li");
-        item.setAttributeNS(XML_NS, "xml:lang", "x-default");
-        item.textContent = metadata.title;
-        alt.appendChild(item);
-        title.appendChild(alt);
-        description.appendChild(title);
-      }
-
-      removeDirectChildren(description, DC_NS, "description");
-      description.removeAttributeNS(DC_NS, "description");
-      if (metadata.description) {
-
-        const descriptionElement = doc.createElementNS(DC_NS, "dc:description");
-        const alt = doc.createElementNS(RDF_NS, "rdf:Alt");
-        const item = doc.createElementNS(RDF_NS, "rdf:li");
-        item.setAttributeNS(XML_NS, "xml:lang", "x-default");
-        item.textContent = metadata.description;
-        alt.appendChild(item);
-        descriptionElement.appendChild(alt);
-        description.appendChild(descriptionElement);
-      }
+      replaceLangAltXmpProperty(doc, description, DC_NS, "dc:title", metadata.title, {
+        RDF_NS,
+        XML_NS
+      });
+      replaceLangAltXmpProperty(doc, description, DC_NS, "dc:description", metadata.description, {
+        RDF_NS,
+        XML_NS
+      });
+      replaceLangAltXmpProperty(
+        doc,
+        description,
+        IPTC_CORE_NS,
+        "Iptc4xmpCore:AltTextAccessibility",
+        metadata.altTextAccessibility,
+        { RDF_NS, XML_NS }
+      );
+      replaceOrderedArrayXmpProperty(doc, description, DC_NS, "dc:creator", metadata.creators, {
+        RDF_NS
+      });
 
       let serialized = new XMLSerializer().serializeToString(doc);
       if (!serialized.includes("<?xpacket")) {
@@ -1789,6 +2811,8 @@
         "AIPromptInformation",
         "AIPromptWriterName",
         "AIPromptWriterOrganisation",
+        "Creator",
+        "AltTextAccessibility",
         "CreditLine",
         "Disclosure",
         "Processing",
@@ -1815,17 +2839,6 @@
 
       if (metadata.title) chunks.push(makeITXtChunk("Title", metadata.title));
       if (metadata.description) chunks.push(makeITXtChunk("Description", metadata.description));
-      if (metadata.digitalSourceType) chunks.push(makeITXtChunk("DigitalSourceType", metadata.digitalSourceType));
-      if (metadata.aiSystemUsed) chunks.push(makeITXtChunk("AISystemUsed", metadata.aiSystemUsed));
-      if (metadata.aiSystemVersionUsed) chunks.push(makeITXtChunk("AISystemVersionUsed", metadata.aiSystemVersionUsed));
-      if (metadata.aiPromptInformation) chunks.push(makeITXtChunk("AIPromptInformation", metadata.aiPromptInformation));
-      if (metadata.aiPromptWriterName) chunks.push(makeITXtChunk("AIPromptWriterName", metadata.aiPromptWriterName));
-      if (metadata.aiPromptWriterOrganisation) chunks.push(makeITXtChunk("AIPromptWriterOrganisation", metadata.aiPromptWriterOrganisation));
-      if (metadata.creditLine) chunks.push(makeITXtChunk("CreditLine", metadata.creditLine));
-      if (metadata.disclosure) chunks.push(makeITXtChunk("Disclosure", metadata.disclosure));
-      chunks.push(makeITXtChunk("Processing", JSON.stringify(omitNullValues(metadata.processing))));
-      chunks.push(makeITXtChunk("Custom", JSON.stringify(omitNullValues(metadata.custom))));
-      chunks.push(makeITXtChunk("MetadataJson", JSON.stringify(omitNullValues(metadata))));
       chunks.push(makeITXtChunk("Software", metadata.processing.tool));
       chunks.push(makeITXtChunk(
         "XML:com.adobe.xmp",
@@ -1955,11 +2968,15 @@
       return concatBytes(asciiBytes("RIFF"), writeUint32le(body.length), body);
     }
 
-    els.sourceFile.addEventListener("change", async event => {
-      const file = event.target.files?.[0];
+    function isSupportedSourceFile(file) {
+      return /^image\/(png|jpeg|webp)$/i.test(file.type)
+        || /\.(png|jpe?g|webp)$/i.test(file.name);
+    }
+
+    async function processSourceFile(file) {
       if (!file) return;
 
-      if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+      if (!isSupportedSourceFile(file)) {
         setStatus("Please choose a PNG, JPEG or WebP source image.", true);
         return;
       }
@@ -1968,12 +2985,23 @@
         setStatus("Loading source image…");
         const fileBytes = new Uint8Array(await file.arrayBuffer());
         const decoded = await decodeImage(file);
+        const detectedMimeType = /^image\/(png|jpeg|webp)$/i.test(file.type)
+          ? file.type.toLowerCase()
+          : /\.png$/i.test(file.name)
+            ? "image/png"
+            : /\.webp$/i.test(file.name)
+              ? "image/webp"
+              : "image/jpeg";
+
         closeImage(sourceImage);
         sourceImage = decoded;
         sourceBytes = fileBytes;
-        sourceMimeType = file.type;
-        sourceMetadata = analyzeSourceMetadata(fileBytes, file.type);
+        sourceMimeType = detectedMimeType;
+        sourceMetadata = analyzeSourceMetadata(fileBytes, detectedMimeType);
         sourceBaseName = file.name.replace(/\.[^.]+$/, "") || "image";
+        els.sourceFileName.textContent = file.name;
+        els.dropZone.classList.add("has-file");
+        resetMetadataFormForSource();
         lastExportReport = null;
         queueRender();
       } catch (error) {
@@ -1982,6 +3010,38 @@
         sourceMetadata = emptySourceMetadata();
         setStatus(error.message, true);
       }
+    }
+
+    els.dropZone.addEventListener("click", () => els.sourceFile.click());
+
+    els.dropZone.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        els.sourceFile.click();
+      }
+    });
+
+    els.sourceFile.addEventListener("change", event => {
+      processSourceFile(event.target.files?.[0]);
+    });
+
+    for (const eventName of ["dragenter", "dragover"]) {
+      els.dropZone.addEventListener(eventName, event => {
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+        els.dropZone.classList.add("drag-over");
+      });
+    }
+
+    for (const eventName of ["dragleave", "drop"]) {
+      els.dropZone.addEventListener(eventName, event => {
+        event.preventDefault();
+        els.dropZone.classList.remove("drag-over");
+      });
+    }
+
+    els.dropZone.addEventListener("drop", event => {
+      processSourceFile(event.dataTransfer?.files?.[0]);
     });
 
     els.defaultBadge.addEventListener("change", async () => {
@@ -2008,14 +3068,12 @@
       els.aiSystemVersionUsed,
       els.aiPromptInformation,
       els.aiPromptWriterName,
-      els.aiPromptWriterOrganisation,
+      els.creator,
       els.title,
       els.description,
+      els.altTextAccessibility,
       els.creditLine,
-      els.disclosure,
       els.processingOperations,
-      els.customMetadata,
-      els.metadataMode,
       els.format,
       els.quality
     ]) {
@@ -2026,6 +3084,8 @@
       element.addEventListener("input", invalidateAndRender);
       element.addEventListener("change", invalidateAndRender);
     }
+
+    els.metadataMode.addEventListener("change", switchMetadataMode);
 
     window.addEventListener("beforeunload", () => {
       closeImage(sourceImage);
