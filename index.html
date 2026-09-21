@@ -24,35 +24,28 @@
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f6f6fb;
-      --surface: #ffffff;
-      --surface-muted: #f1f0f8;
-      --text: #171624;
-      --muted: #66637a;
-      --border: #dfddea;
-      --primary: #6d4aff;
-      --primary-dark: #5233dc;
-      --primary-soft: #eee9ff;
-      --success: #127a58;
+      --bg: #f6f7f9;
+      --surface: #fff;
+      --text: #18181b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --primary: #18181b;
+      --primaryText: #fff;
+      --focus: #3b82f6;
       --danger: #b42318;
-      --shadow: 0 14px 45px rgba(43, 37, 85, .08);
-      --radius: 18px;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #111018;
-        --surface: #1b1925;
-        --surface-muted: #242131;
-        --text: #f5f3ff;
-        --muted: #aaa5bd;
-        --border: #353145;
-        --primary: #9c87ff;
-        --primary-dark: #b5a6ff;
-        --primary-soft: #2b2548;
-        --success: #61d6ac;
+        --bg: #111113;
+        --surface: #18181b;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --border: #3f3f46;
+        --primary: #f4f4f5;
+        --primaryText: #18181b;
+        --focus: #60a5fa;
         --danger: #ff8a80;
-        --shadow: 0 18px 55px rgba(0, 0, 0, .28);
       }
     }
 
@@ -78,11 +71,7 @@
     }
 
     .site-header {
-      padding: 52px 0 42px;
-      background:
-        radial-gradient(circle at 88% 15%, rgba(255, 255, 255, .22), transparent 22%),
-        linear-gradient(130deg, #2c176f, #6d4aff 58%, #925eff);
-      color: #fff;
+      padding: 64px 0 30px;
     }
 
     .header-inner {
@@ -94,66 +83,58 @@
 
     .eyebrow {
       margin: 0;
-      font-size: .76rem;
-      font-weight: 750;
-      letter-spacing: .13em;
-      text-transform: uppercase;
       color: var(--muted);
-    }
-
-    .site-header .eyebrow {
-      color: rgba(255, 255, 255, .72);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: .08em;
+      text-transform: uppercase;
     }
 
     h1 {
-      margin: 4px 0 12px;
-      font-size: clamp(2.1rem, 5vw, 4rem);
-      line-height: 1.04;
-      letter-spacing: -.04em;
+      margin: 4px 0 7px;
+      font-size: 30px;
+      font-weight: 680;
+      line-height: 1.2;
+      letter-spacing: -.035em;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 680;
+      line-height: 1.3;
+      letter-spacing: -.02em;
     }
 
     .subtitle {
       max-width: 760px;
       margin: 0;
-      font-size: 1.08rem;
-      color: rgba(255, 255, 255, .82);
+      color: var(--muted);
+      font-size: 14px;
     }
 
-    .privacy-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-      padding: 9px 13px;
-      border: 1px solid rgba(255, 255, 255, .28);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .12);
-      font-size: .88rem;
-      backdrop-filter: blur(8px);
-    }
-
-    .privacy-pill svg {
-      width: 18px;
-      fill: currentColor;
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
     }
 
     .app {
-      padding: 34px 0 64px;
+      padding: 0 0 44px;
     }
 
     .card-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       align-items: start;
-      gap: 18px;
+      gap: 20px;
     }
 
     .card {
       min-width: 0;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      border-radius: 14px;
     }
 
     .card--full {
@@ -162,33 +143,6 @@
 
     .card-section {
       padding: 24px;
-    }
-
-    .card-heading {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 18px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .card-heading h2 {
-      margin: 3px 0 0;
-      font-size: 1.22rem;
-      line-height: 1.25;
-    }
-
-    .card-description {
-      margin-top: 5px;
-      font-size: .9rem;
-    }
-
-    p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
     }
 
     .source-card,
@@ -205,79 +159,100 @@
       flex: 1;
     }
 
+    .card-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-heading h2 {
+      margin-top: 3px;
+    }
+
+    .card-description {
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
     .drop-zone {
       min-height: 218px;
-      padding: 30px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      border: 2px dashed #a89bdd;
-      border-radius: 16px;
+      padding: 30px 24px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
       outline: none;
-      background: var(--surface-muted);
+      background: var(--bg);
+      text-align: center;
       cursor: pointer;
-      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
     }
 
     .drop-zone:hover,
-    .drop-zone:focus-visible,
     .drop-zone.drag-over {
-      transform: translateY(-2px);
-      border-color: var(--primary);
-      background: var(--primary-soft);
+      border-color: var(--text);
     }
 
     .drop-zone:focus-visible {
-      box-shadow: var(--shadow), 0 0 0 4px color-mix(in srgb, var(--primary), transparent 78%);
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
     }
 
     .drop-zone.has-file {
       border-style: solid;
-      border-color: color-mix(in srgb, var(--primary), var(--border) 42%);
+      border-color: var(--text);
     }
 
     .drop-zone h2 {
       margin: 14px 0 4px;
-      font-size: 1.45rem;
-      line-height: 1.25;
+      font-size: 18px;
+      font-weight: 680;
+      letter-spacing: -.02em;
     }
 
     .drop-zone p {
       margin: 0 0 8px;
+      font-size: 14px;
     }
 
     .drop-zone small {
       max-width: 100%;
       color: var(--muted);
+      font-size: 12px;
       overflow-wrap: anywhere;
     }
 
     .drop-icon {
-      width: 58px;
-      height: 58px;
+      width: 48px;
+      height: 48px;
       display: grid;
       place-items: center;
-      border-radius: 18px;
-      color: var(--primary);
-      background: var(--primary-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
     }
 
     .drop-icon svg {
-      width: 28px;
+      width: 24px;
       fill: currentColor;
     }
 
     .link-like {
-      color: var(--primary);
-      font-weight: 700;
+      color: var(--text);
+      font-weight: 650;
       text-decoration: underline;
+      text-decoration-color: var(--border);
       text-underline-offset: 3px;
     }
 
     .field {
-      margin-top: 14px;
+      margin-top: 16px;
     }
 
     .card-heading+.field,
@@ -293,16 +268,15 @@
 
     label {
       display: block;
-      margin-bottom: 6px;
-      font-size: .86rem;
-      font-weight: 680;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
     }
 
     input,
     select,
     textarea,
     button {
-      width: 100%;
       font: inherit;
     }
 
@@ -311,44 +285,43 @@
     input[type="number"],
     select,
     textarea {
-      min-height: 42px;
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 11px;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 11px;
+      border-radius: 8px;
       outline: none;
       background: var(--surface);
       color: var(--text);
-      transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+      font-size: 14px;
     }
 
     input[type="file"] {
-      padding: 6px;
-      background: var(--surface-muted);
+      padding: 5px;
+      background: var(--bg);
     }
 
     input[type="file"]::file-selector-button {
       margin-right: 10px;
-      border: 0;
-      border-radius: 8px;
       padding: 7px 11px;
-      color: #fff;
+      border: 1px solid var(--primary);
+      border-radius: 7px;
       background: var(--primary);
+      color: var(--primaryText);
       font: inherit;
-      font-weight: 700;
+      font-size: 13px;
+      font-weight: 650;
       cursor: pointer;
-    }
-
-    input[type="file"]::file-selector-button:hover {
-      background: var(--primary-dark);
     }
 
     input[type="file"]:focus,
     input[type="text"]:focus,
     input[type="number"]:focus,
     select:focus,
-    textarea:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary), transparent 80%);
+    textarea:focus,
+    button:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
     }
 
     textarea {
@@ -357,6 +330,7 @@
     }
 
     input[type="range"] {
+      width: 100%;
       accent-color: var(--primary);
     }
 
@@ -368,13 +342,14 @@
     }
 
     .quality-field .range-line {
-      min-height: 42px;
+      min-height: 40px;
     }
 
     output {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
       color: var(--muted);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
     }
 
     .button-row {
@@ -385,43 +360,39 @@
     }
 
     button {
-      min-height: 42px;
-      border: 1px solid var(--primary);
-      border-radius: 10px;
-      padding: 9px 14px;
+      min-height: 40px;
+      padding: 0 17px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 650;
       cursor: pointer;
-      font-weight: 700;
-      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(.97);
     }
 
     button.primary {
+      border-color: var(--primary);
       background: var(--primary);
-      color: #fff;
-    }
-
-    button.primary:hover:not(:disabled) {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
+      color: var(--primaryText);
     }
 
     button.secondary {
-      color: var(--text);
       background: var(--surface);
-      border-color: var(--border);
-    }
-
-    button.secondary:hover:not(:disabled) {
-      background: var(--surface-muted);
-    }
-
-    button:focus-visible {
-      outline: 3px solid color-mix(in srgb, var(--primary), transparent 70%);
-      outline-offset: 2px;
+      color: var(--text);
     }
 
     button:disabled {
       cursor: not-allowed;
       opacity: .5;
+    }
+
+    .button-row button {
+      width: 100%;
     }
 
     .preview-card {
@@ -441,8 +412,8 @@
       margin: 0;
       padding: 24px;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      background: var(--surface-muted);
+      border-radius: 9px;
+      background: var(--bg);
     }
 
     .canvas-surface {
@@ -452,15 +423,14 @@
       max-height: 72vh;
       overflow: hidden;
       line-height: 0;
-      border: 1px solid color-mix(in srgb, var(--border), var(--text) 12%);
-      border-radius: 10px;
-      box-shadow: 0 8px 28px rgba(24, 20, 55, .12);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       background-color: var(--surface);
       background-image:
-        linear-gradient(45deg, var(--surface-muted) 25%, transparent 25%),
-        linear-gradient(-45deg, var(--surface-muted) 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, var(--surface-muted) 75%),
-        linear-gradient(-45deg, transparent 75%, var(--surface-muted) 75%);
+        linear-gradient(45deg, var(--border) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--border) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--border) 75%);
       background-size: 24px 24px;
       background-position: 0 0, 0 12px, 12px -12px, -12px 0;
     }
@@ -482,11 +452,12 @@
       min-height: 1.25em;
       margin-top: 4px;
       color: var(--muted);
-      font-size: .9rem;
+      font-size: 12px;
     }
 
     .status.error {
       color: var(--danger);
+      font-weight: 600;
     }
 
     .metadata-preview {
@@ -494,39 +465,48 @@
       max-height: 560px;
       overflow: auto;
       margin: 0;
-      padding: 18px;
+      padding: 14px;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #111018;
-      color: #e9e5ff;
-      font: .82rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      border-radius: 9px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.6;
     }
 
     .note {
       margin-top: 12px;
-      font-size: .8rem;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
     }
 
     code {
-      padding: .08em .34em;
-      border-radius: 5px;
-      background: var(--primary-soft);
-      color: var(--primary);
-      font-size: .94em;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: .92em;
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      text-decoration-color: var(--text);
     }
 
     .site-footer {
-      padding: 0 0 34px;
+      margin-top: 20px;
+      padding-bottom: 32px;
       color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
       text-align: center;
-    }
-
-    .site-footer a {
-      color: var(--primary);
-      font-weight: 650;
-      text-underline-offset: 3px;
     }
 
     @media (max-width: 900px) {
@@ -545,25 +525,17 @@
 
     @media (max-width: 680px) {
       .site-header {
-        padding: 36px 0 32px;
+        padding: 32px 0 24px;
       }
 
       .header-inner {
         flex-direction: column;
         align-items: stretch;
-      }
-
-      .privacy-pill {
-        align-self: flex-start;
+        gap: 16px;
       }
 
       .app {
-        padding-top: 22px;
-      }
-
-      .drop-zone {
-        min-height: 270px;
-        padding: 42px 18px;
+        padding-bottom: 32px;
       }
 
       .card-section {
@@ -573,6 +545,11 @@
       .card-heading {
         flex-direction: column;
         gap: 8px;
+      }
+
+      .drop-zone {
+        min-height: 240px;
+        padding: 32px 18px;
       }
 
       .preview-status {
@@ -586,7 +563,7 @@
 
       .canvas-wrap {
         min-height: 280px;
-        margin: 0;
+        padding: 18px;
       }
     }
   </style>
@@ -625,18 +602,9 @@
   <header class="site-header">
     <div class="container header-inner">
       <div>
-        <p class="eyebrow">Browser-based AI transparency editor</p>
         <h1>AI Image Transparency Tool</h1>
         <p class="subtitle">Add a visible AI disclosure badge and transparency metadata without uploading the image.</p>
       </div>
-      <div class="privacy-pill" title="The selected image is processed by JavaScript in this browser.">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M12 2 4.5 5v5.6c0 5 3.2 9.6 7.5 11.4 4.3-1.8 7.5-6.4 7.5-11.4V5L12 2Zm0 2.2 5.4 2.1v4.3c0 3.9-2.2 7.6-5.4 9.2-3.2-1.6-5.4-5.3-5.4-9.2V6.3L12 4.2Zm-.9 4v3H8.3v2.1h2.8v3h2.1v-3H16v-2.1h-2.8v-3h-2.1Z" />
-        </svg>
-        Local processing
-      </div>
-    </div>
   </header>
 
   <main class="container app">
@@ -875,10 +843,9 @@
   </main>
 
   <footer class="site-footer">
-    <div class="container">
-      <small>Made with ❤️ in Berlin. Source code on <a
-          href="https://github.com/openpotato/ai-image-transparency-tool">GitHub</a>.</small>
-    </div>
+    <p><strong>Runs locally in your browser. No data is transmitted.</strong></p>
+    <p>Made with ❤️ in Berlin. Source code on <a
+        href="https://github.com/openpotato/ai-image-transparency-tool">GitHub</a>.</p>
   </footer>
 
   <script>
@@ -917,7 +884,7 @@
       canvas: document.querySelector("#canvas")
     };
 
-    const ctx = els.canvas.getContext("2d", { alpha: true });
+    const ctx = els.canvas.getContext("2d", {alpha: true});
     const utf8 = new TextEncoder();
     const utf8Decoder = new TextDecoder("utf-8");
     const latin1Decoder = new TextDecoder("latin1");
@@ -931,7 +898,7 @@
     let renderQueued = false;
     let lastExportReport = null;
     let activeMetadataMode = els.metadataMode.value;
-    let metadataFormStates = { update: null, replace: null };
+    let metadataFormStates = {update: null, replace: null};
     const initialMetadataFormState = captureMetadataFormState();
 
     const SECURITY_NOTE = "The metadata written by this tool is unsigned XMP metadata and does not provide tamper detection. No C2PA manifest, digital signature, or trusted timestamp was added by this tool.";
@@ -1279,7 +1246,7 @@
     async function decodeImage(blob) {
       if ("createImageBitmap" in window) {
         try {
-          return await createImageBitmap(blob, { imageOrientation: "from-image" });
+          return await createImageBitmap(blob, {imageOrientation: "from-image"});
         } catch {
           try {
             return await createImageBitmap(blob);
@@ -1306,7 +1273,7 @@
 
     async function loadDefaultBadge(defaultKey = els.defaultBadge.value) {
       const svg = defaultBadgeSvgs[defaultKey] || defaultBadgeSvgs["ai-generated-black-transparent"];
-      const blob = new Blob([svg], { type: "image/svg+xml" });
+      const blob = new Blob([svg], {type: "image/svg+xml"});
       const decoded = await decodeImage(blob);
       closeImage(badgeImage);
       badgeImage = decoded;
@@ -1348,7 +1315,7 @@
 
       x = Math.max(0, Math.min(x, canvasWidth - width));
       y = Math.max(0, Math.min(y, canvasHeight - height));
-      return { x, y, width, height };
+      return {x, y, width, height};
     }
 
     function render() {
@@ -1514,7 +1481,7 @@
         const key = `${type}\u0000${description}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        result.push({ ...operation, type, description });
+        result.push({...operation, type, description});
       }
 
       return result;
@@ -1537,7 +1504,7 @@
     }
 
     function cloneMetadataFormState(state) {
-      return { ...state };
+      return {...state};
     }
 
     function applyMetadataFormState(state) {
@@ -1600,7 +1567,7 @@
     }
 
     function resetMetadataFormForSource() {
-      metadataFormStates = { update: null, replace: null };
+      metadataFormStates = {update: null, replace: null};
       activeMetadataMode = els.metadataMode.value;
       const state = activeMetadataMode === "update"
         ? buildUpdateModeFormState()
@@ -1794,7 +1761,7 @@
 
       const legacyProcessing = readJsonObject(AIT_NS, "ProcessingJson")
         || readJsonObject(LEGACY_AIB_NS, "ProcessingJson");
-      const processing = legacyProcessing || (historyOperations.length ? { operations: historyOperations } : null);
+      const processing = legacyProcessing || (historyOperations.length ? {operations: historyOperations} : null);
       return {
         title: altValue(DC_NS, "title"),
         description: altValue(DC_NS, "description"),
@@ -1956,7 +1923,7 @@
         });
         updateMetadataPreview();
 
-        const outputBlob = new Blob([outputBytes], { type: output.type });
+        const outputBlob = new Blob([outputBytes], {type: output.type});
         const url = URL.createObjectURL(outputBlob);
         const link = document.createElement("a");
         link.href = url;
@@ -2090,7 +2057,7 @@
         const size = readUint32le(bytes, offset + 4);
         const end = offset + 8 + size + (size % 2);
         if (end > bytes.length) break;
-        chunks.push({ fourcc, size });
+        chunks.push({fourcc, size});
         offset = end;
       }
       return chunks;
@@ -2107,7 +2074,7 @@
         const type = String.fromCharCode(...bytes.slice(offset + 4, offset + 8));
         const end = offset + 12 + size;
         if (end > bytes.length) break;
-        chunks.push({ type, size });
+        chunks.push({type, size});
         offset = end;
         if (type === "IEND") break;
       }
@@ -2117,7 +2084,7 @@
     function inspectJpegSegments(bytes) {
       const segments = [];
       if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return segments;
-      segments.push({ marker: "SOI", size: 0 });
+      segments.push({marker: "SOI", size: 0});
 
       let offset = 2;
       while (offset + 1 < bytes.length) {
@@ -2127,23 +2094,23 @@
 
         const marker = bytes[offset++];
         if (marker === 0xd9) {
-          segments.push({ marker: "EOI", size: 0 });
+          segments.push({marker: "EOI", size: 0});
           break;
         }
         if (marker === 0xda) {
           if (offset + 2 > bytes.length) break;
           const size = ((bytes[offset] << 8) | bytes[offset + 1]) - 2;
-          segments.push({ marker: "SOS", size: Math.max(0, size) });
+          segments.push({marker: "SOS", size: Math.max(0, size)});
           break;
         }
         if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
-          segments.push({ marker: `0xFF${marker.toString(16).toUpperCase().padStart(2, "0")}`, size: 0 });
+          segments.push({marker: `0xFF${marker.toString(16).toUpperCase().padStart(2, "0")}`, size: 0});
           continue;
         }
         if (offset + 2 > bytes.length) break;
         const segmentLength = (bytes[offset] << 8) | bytes[offset + 1];
         if (segmentLength < 2 || offset + segmentLength > bytes.length) break;
-        segments.push({ marker: jpegMarkerName(marker), size: segmentLength - 2 });
+        segments.push({marker: jpegMarkerName(marker), size: segmentLength - 2});
         offset += segmentLength;
       }
       return segments;
@@ -2215,7 +2182,7 @@
 
     function parsePngTextChunk(type, data) {
       const keywordEnd = findZero(data, 0);
-      if (keywordEnd < 1) return { keyword: null, text: null };
+      if (keywordEnd < 1) return {keyword: null, text: null};
 
       const keyword = latin1Decoder.decode(data.slice(0, keywordEnd));
       if (type === "tEXt") {
@@ -2226,21 +2193,21 @@
       }
 
       if (type === "zTXt") {
-        return { keyword, text: null };
+        return {keyword, text: null};
       }
 
       if (type === "iTXt") {
         let offset = keywordEnd + 1;
-        if (offset + 2 > data.length) return { keyword, text: null };
+        if (offset + 2 > data.length) return {keyword, text: null};
         const compressed = data[offset] === 1;
         offset += 2;
 
         const languageEnd = findZero(data, offset);
-        if (languageEnd < 0) return { keyword, text: null };
+        if (languageEnd < 0) return {keyword, text: null};
         offset = languageEnd + 1;
 
         const translatedEnd = findZero(data, offset);
-        if (translatedEnd < 0) return { keyword, text: null };
+        if (translatedEnd < 0) return {keyword, text: null};
         offset = translatedEnd + 1;
 
         return {
@@ -2249,7 +2216,7 @@
         };
       }
 
-      return { keyword: null, text: null };
+      return {keyword: null, text: null};
     }
 
     function sanitizeTiffMetadata(tiffBytes) {
@@ -2373,7 +2340,7 @@
         }
 
         if (metadataTypes.has(type)) {
-          result.pngChunks.push({ type, keyword, raw });
+          result.pngChunks.push({type, keyword, raw});
         }
 
         offset = end;
@@ -2779,7 +2746,7 @@
         IPTC_CORE_NS,
         "Iptc4xmpCore:AltTextAccessibility",
         metadata.altTextAccessibility,
-        { RDF_NS, XML_NS }
+        {RDF_NS, XML_NS}
       );
       replaceOrderedArrayXmpProperty(doc, description, DC_NS, "dc:creator", metadata.creators, {
         RDF_NS
